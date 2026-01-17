@@ -1,0 +1,141 @@
+"""
+S4层 - 完整HiPPO实现 + 数值稳定优化
+
+保留HiPPO初始化，使用更稳定的离散化方法
+"""
+
+import torch
+import torch.nn as nn
+import numpy as np
+import math
+
+class S4Layer(nn.Module):
+    """S4层实现 - HiPPO + 稳定离散化"""
+    
+    def __init__(self, d_model, d_state=64, dropout=0.1):
+        super().__init__()
+        self.d_model = d_model
+        self.d_state = d_state
+        
+        # ========== HiPPO矩阵初始化 (保留!) ==========
+        A = self._hippo_matrix(d_state)
+        
+        # 对HiPPO矩阵做缩放，提高数值稳定性
+        # 缩放因子：确保特征值不会太大
+        self.scale = nn.Parameter(torch.ones(1) * 0.1)  # 可学习的缩放
+        self.register_buffer('A', A)
+        
+        # ========== 可学习参数 ==========
+        # 使用Xavier初始化，更稳定
+        self.B = nn.Parameter(torch.randn(d_model, d_state))
+        nn.init.xavier_uniform_(self.B, gain=0.01)
+        
+        self.C = nn.Parameter(torch.randn(d_model, d_state))
+        nn.init.xavier_uniform_(self.C, gain=0.01)
+        
+        self.D = nn.Parameter(torch.zeros(d_model))  # 初始化为0
+        
+        # Log步长（学习最优离散化步长）
+        self.log_dt = nn.Parameter(torch.ones(1) * math.log(0.01))
+        
+        self.dropout = nn.Dropout(dropout)
+        self.layer_norm = nn.LayerNorm(d_model)
+        
+    def _hippo_matrix(self, N):
+        """
+        生成HiPPO矩阵 - HiPPO-LegS (Scaled Legendre)
+        
+        这是历史信息最优投影的关键！
+        """
+        A = np.zeros((N, N))
+        for n in range(N):
+            for k in range(N):
+                if n > k:
+                    A[n, k] = -(2*n+1)**0.5 * (2*k+1)**0.5
+                elif n == k:
+                    A[n, k] = n + 1
+        
+        # 归一化HiPPO矩阵，防止数值过大
+        A = A / np.max(np.abs(A))
+        
+        return torch.tensor(A, dtype=torch.float32)
+    
+    def _discretize(self, dt):
+        """
+        使用双线性变换 (Bilinear/Tustin) 离散化
+        比矩阵指数更稳定！
+        
+        连续: dx/dt = Ax + Bu
+        离散: x[k+1] = A_d x[k] + B_d u[k]
+        
+        双线性变换: s = 2/dt * (z-1)/(z+1)
+        A_d = (I + dt/2 * A)^-1 (I - dt/2 * A)
+        B_d = (I + dt/2 * A)^-1 * B * dt
+        """
+        device = self.A.device
+        I = torch.eye(self.d_state, device=device)
+        
+        # 缩放的HiPPO矩阵
+        A_scaled = self.A * self.scale
+        
+        # 双线性变换
+        # A_d = (I + dt/2 * A)^-1 @ (I - dt/2 * A)
+        dA = dt / 2.0 * A_scaled
+        
+        # 使用solve代替inverse，数值更稳定
+        A_discrete = torch.linalg.solve(I + dA, I - dA)
+        
+        # B_d = (I + dt/2 * A)^-1 @ B * dt
+        # 这里B是 [d_model, d_state]，需要转置处理
+        
+        return A_discrete
+    
+    def forward(self, x):
+        """
+        前向传播 - HiPPO + 稳定离散化
+        
+        输入: x [batch, length, d_model]
+        输出: [batch, length, d_model]
+        """
+        batch, length, d_model = x.shape
+        device = x.device
+        
+        # 学习到的时间步长
+        dt = torch.exp(self.log_dt).clamp(min=1e-4, max=0.1)
+        
+        # 离散化 (使用稳定方法)
+        A_discrete = self._discretize(dt)  # [d_state, d_state]
+        
+        # B的离散化: B_d = B * dt (简化版，已足够稳定)
+        B_discrete = self.B * dt  # [d_model, d_state]
+        
+        # 初始化状态
+        state = torch.zeros(batch, d_model, self.d_state, device=device)
+        outputs = []
+        
+        for t in range(length):
+            x_t = x[:, t, :]  # [batch, d_model]
+            
+            # 状态更新: state = state @ A_d^T + x_t * B_d
+            # [batch, d_model, d_state] @ [d_state, d_state]
+            state = torch.einsum('bds,st->bdt', state, A_discrete.T)
+            
+            # 加上输入项
+            state = state + x_t.unsqueeze(2) * B_discrete.unsqueeze(0)
+            
+            # 裁剪状态，防止爆炸
+            state = torch.clamp(state, min=-10, max=10)
+            
+            # 输出: y = state @ C^T + D * x_t
+            y = torch.einsum('bds,ds->bd', state, self.C) + self.D * x_t
+            
+            outputs.append(y)
+        
+        output = torch.stack(outputs, dim=1)  # [batch, length, d_model]
+        
+        # 残差连接 + LayerNorm
+        output = self.dropout(output)
+        output = self.layer_norm(x + output)
+        
+        return output
+
