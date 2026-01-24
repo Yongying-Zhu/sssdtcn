@@ -56,9 +56,9 @@ class ImplicitExplicitDiffusionModel(nn.Module):
         emb = timesteps.unsqueeze(1).float() * emb.unsqueeze(0)
         return torch.cat([torch.sin(emb), torch.cos(emb)], dim=-1)
     
-    def forward(self, x, timesteps, mask, observed):
+    def forward(self, x, timesteps, mask):
         batch, seq_len, _ = x.shape
-        x_cond = x * mask + observed
+        x_cond = x
         
         mask_embed = self.mask_embedding(mask)
         x_proj = self.input_proj(x_cond)

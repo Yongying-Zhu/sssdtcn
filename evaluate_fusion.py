@@ -43,7 +43,7 @@ def evaluate_with_fusion(config, missing_ratio=0.5):
         dropout=config.dropout
     ).to(config.device)
 
-    diffusion_checkpoint = torch.load(os.path.join(config.save_dir, 'diffusion_best.pth'))
+    diffusion_checkpoint = torch.load(os.path.join(config.save_dir, 'diffusion_best.pth'), map_location=config.device)
     diffusion_model.load_state_dict(diffusion_checkpoint['model_state_dict'])
     diffusion_model.eval()
 
@@ -58,7 +58,7 @@ def evaluate_with_fusion(config, missing_ratio=0.5):
         dropout=config.dropout
     ).to(config.device)
 
-    transformer_checkpoint = torch.load(config.transformer_model_path)
+    transformer_checkpoint = torch.load(config.transformer_model_path, map_location=config.device)
     transformer_model.load_state_dict(transformer_checkpoint['model_state_dict'])
     transformer_model.eval()
 
@@ -83,7 +83,7 @@ def evaluate_with_fusion(config, missing_ratio=0.5):
 
             # Diffusion预测
             timesteps = torch.zeros(batch_size, dtype=torch.long, device=config.device)
-            pred_diffusion = diffusion_model(masked_data, timesteps, mask, masked_data)
+            pred_diffusion = diffusion_model(masked_data, timesteps, mask)
 
             # Transformer预测
             pred_transformer = transformer_model(masked_data, mask)

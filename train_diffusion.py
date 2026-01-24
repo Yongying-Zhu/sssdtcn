@@ -31,7 +31,7 @@ def train_epoch(model, train_loader, optimizer, device, missing_ratio=0.5):
 
         # 直接预测完整数据（t=0）
         timesteps = torch.zeros(batch_size, dtype=torch.long, device=device)
-        predicted_data = model(masked_data, timesteps, mask, masked_data)
+        predicted_data = model(masked_data, timesteps, mask)
 
         # 计算缺失位置的MSE loss
         mask_missing = (mask == 0)  # True = missing
@@ -66,7 +66,7 @@ def validate(model, val_loader, device, missing_ratio=0.5):
 
             # 直接预测完整数据（t=0）
             timesteps = torch.zeros(batch_size, dtype=torch.long, device=device)
-            predicted_data = model(masked_data, timesteps, mask, masked_data)
+            predicted_data = model(masked_data, timesteps, mask)
 
             # 计算缺失位置的MSE loss
             mask_missing = (mask == 0)
