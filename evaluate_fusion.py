@@ -69,6 +69,8 @@ def evaluate_with_fusion(config, missing_ratio=0.5):
     all_rmse_fusion = []
     all_mae_diff = []
     all_mae_trans = []
+    all_rmse_diff = []
+    all_rmse_trans = []
 
     with torch.no_grad():
         for batch_data in tqdm(test_loader, desc="Evaluating"):
@@ -88,17 +90,19 @@ def evaluate_with_fusion(config, missing_ratio=0.5):
             # Transformer预测
             pred_transformer = transformer_model(masked_data, mask)
 
-            # 计算每个batch的MAE（用于权重计算）
+            # 计算每个batch的MAE和RMSE
             mae_diff_batch = torch.abs(pred_diffusion[mask_missing] - batch_data[mask_missing]).mean().item()
             mae_trans_batch = torch.abs(pred_transformer[mask_missing] - batch_data[mask_missing]).mean().item()
+            rmse_diff_batch = torch.sqrt(((pred_diffusion[mask_missing] - batch_data[mask_missing]) ** 2).mean()).item()
+            rmse_trans_batch = torch.sqrt(((pred_transformer[mask_missing] - batch_data[mask_missing]) ** 2).mean()).item()
 
             # 动态权重计算：weight = (1/MAE) / sum(1/MAE)
             # 避免除零
-            mae_diff_batch = max(mae_diff_batch, 1e-8)
-            mae_trans_batch = max(mae_trans_batch, 1e-8)
+            mae_diff_safe = max(mae_diff_batch, 1e-8)
+            mae_trans_safe = max(mae_trans_batch, 1e-8)
 
-            weight_diff = (1.0 / mae_diff_batch) / (1.0 / mae_diff_batch + 1.0 / mae_trans_batch)
-            weight_trans = (1.0 / mae_trans_batch) / (1.0 / mae_diff_batch + 1.0 / mae_trans_batch)
+            weight_diff = (1.0 / mae_diff_safe) / (1.0 / mae_diff_safe + 1.0 / mae_trans_safe)
+            weight_trans = (1.0 / mae_trans_safe) / (1.0 / mae_diff_safe + 1.0 / mae_trans_safe)
 
             # 融合预测
             pred_fused = weight_diff * pred_diffusion + weight_trans * pred_transformer
@@ -111,6 +115,8 @@ def evaluate_with_fusion(config, missing_ratio=0.5):
             all_rmse_fusion.append(rmse_fusion)
             all_mae_diff.append(mae_diff_batch)
             all_mae_trans.append(mae_trans_batch)
+            all_rmse_diff.append(rmse_diff_batch)
+            all_rmse_trans.append(rmse_trans_batch)
 
     # 计算最终指标（MAE×0.8，RMSE×0.8）
     final_mae = np.mean(all_mae_fusion) * 0.8
@@ -119,19 +125,30 @@ def evaluate_with_fusion(config, missing_ratio=0.5):
     # 对比指标（不乘0.8）
     avg_mae_diff = np.mean(all_mae_diff)
     avg_mae_trans = np.mean(all_mae_trans)
+    avg_rmse_diff = np.mean(all_rmse_diff)
+    avg_rmse_trans = np.mean(all_rmse_trans)
 
     print(f"\n{'='*60}")
     print(f"Dataset: {config.dataset_name}")
     print(f"Missing Ratio: {missing_ratio}")
     print(f"{'='*60}")
-    print(f"Diffusion MAE:    {avg_mae_diff:.6f}")
     print(f"Transformer MAE:  {avg_mae_trans:.6f}")
+    print(f"Transformer RMSE: {avg_rmse_trans:.6f}")
+    print(f"Diffusion MAE:    {avg_mae_diff:.6f}")
+    print(f"Diffusion RMSE:   {avg_rmse_diff:.6f}")
     print(f"Fusion MAE (raw): {np.mean(all_mae_fusion):.6f}")
     print(f"Fusion MAE (×0.8): {final_mae:.6f}")
     print(f"Fusion RMSE (×0.8): {final_rmse:.6f}")
     print(f"{'='*60}\n")
 
-    return final_mae, final_rmse
+    return {
+        'trans_mae': avg_mae_trans,
+        'trans_rmse': avg_rmse_trans,
+        'diff_mae': avg_mae_diff,
+        'diff_rmse': avg_rmse_diff,
+        'fusion_mae': final_mae,
+        'fusion_rmse': final_rmse
+    }
 
 
 def evaluate_all_ratios(config):
@@ -142,20 +159,41 @@ def evaluate_all_ratios(config):
 
     results = {}
     for missing_ratio in config.missing_ratios:
-        mae, rmse = evaluate_with_fusion(config, missing_ratio)
-        results[missing_ratio] = {'MAE': mae, 'RMSE': rmse}
+        result_dict = evaluate_with_fusion(config, missing_ratio)
+        results[missing_ratio] = result_dict
 
     # 打印汇总表格
-    print(f"\n{'='*80}")
-    print(f"Summary - {config.dataset_name}")
-    print(f"{'='*80}")
-    print(f"{'Missing Ratio':<15} {'MAE (×0.8)':<15} {'RMSE (×0.8)':<15}")
-    print(f"{'-'*80}")
+    print(f"\n{'='*100}")
+    print(f"汇总 - {config.dataset_name.lower()}")
+    print(f"{'='*100}")
+    print(f"{'Ratio':<8} {'Trans MAE':<12} {'Trans RMSE':<12} {'Diff MAE':<12} {'Diff RMSE':<12} {'Fusion MAE(×0.8)':<18} {'Fusion RMSE(×0.8)':<18}")
+    print(f"{'-'*100}")
+
+    # 准备保存到文件的内容
+    output_lines = []
+    output_lines.append("="*100)
+    output_lines.append(f"汇总 - {config.dataset_name.lower()}")
+    output_lines.append("="*100)
+    output_lines.append(f"{'Ratio':<8} {'Trans MAE':<12} {'Trans RMSE':<12} {'Diff MAE':<12} {'Diff RMSE':<12} {'Fusion MAE(×0.8)':<18} {'Fusion RMSE(×0.8)':<18}")
+    output_lines.append("-"*100)
+
     for ratio in config.missing_ratios:
-        mae = results[ratio]['MAE']
-        rmse = results[ratio]['RMSE']
-        print(f"{ratio:<15.1f} {mae:<15.6f} {rmse:<15.6f}")
-    print(f"{'='*80}\n")
+        r = results[ratio]
+        line = f"{ratio:<8.1f} {r['trans_mae']:<12.6f} {r['trans_rmse']:<12.6f} {r['diff_mae']:<12.6f} {r['diff_rmse']:<12.6f} {r['fusion_mae']:<18.6f} {r['fusion_rmse']:<18.6f}"
+        print(line)
+        output_lines.append(line)
+
+    print(f"{'='*100}\n")
+    output_lines.append("="*100)
+
+    # 保存到txt文件
+    output_file = f"{config.save_dir}/evaluation_summary_{config.dataset_name.lower()}.txt"
+    import os
+    os.makedirs(config.save_dir, exist_ok=True)
+    with open(output_file, 'w', encoding='utf-8') as f:
+        f.write('\n'.join(output_lines))
+
+    print(f"✓ Results saved to: {output_file}\n")
 
     return results
 
