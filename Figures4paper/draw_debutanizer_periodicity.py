@@ -23,8 +23,12 @@ samples_per_day = samples_per_hour * 24  # 1440 samples per day
 samples_per_period = 480  # 8 hours for period overlay
 
 # ══════════════════════════════════════════════════════════════
-#  CREATE FIGURE
+#  CREATE FIGURE WITH AESTHETIC SETTINGS
 # ══════════════════════════════════════════════════════════════
+
+plt.rcParams['font.family'] = 'sans-serif'
+plt.rcParams['axes.linewidth'] = 0.8
+plt.rcParams['axes.edgecolor'] = '#333333'
 
 fig = plt.figure(figsize=(10, 7.5))
 
@@ -32,7 +36,7 @@ ax1 = fig.add_axes([0.08, 0.58, 0.40, 0.35])
 ax2 = fig.add_axes([0.56, 0.58, 0.40, 0.35])
 ax3 = fig.add_axes([0.08, 0.10, 0.88, 0.38])
 
-C_GRAY = '#888888'
+C_GRAY = '#666666'
 C_ORANGE = '#E8853D'
 
 # ══════════════════════════════════════════════════════════════
@@ -40,48 +44,47 @@ C_ORANGE = '#E8853D'
 # ══════════════════════════════════════════════════════════════
 
 fig.text(0.50, 0.96, f'Feature {feature_name} in Debutanizer',
-         fontsize=13, fontweight='bold', ha='center')
+         fontsize=14, fontweight='bold', ha='center', color='#222222')
 
 # ══════════════════════════════════════════════════════════════
-#  (a) LONG-TERM TREND - in DAYS (no blue line, only gray)
+#  (a) LONG-TERM TREND - in DAYS
 # ══════════════════════════════════════════════════════════════
 
 time_days = np.arange(n_samples) / samples_per_day
 
-# Only gray line showing entire dataset trend
-ax1.plot(time_days, feature, color=C_GRAY, linewidth=0.8, alpha=0.9)
+ax1.plot(time_days, feature, color=C_GRAY, linewidth=0.7, alpha=0.9)
 
 ax1.set_ylabel('Feature value', fontsize=10)
-ax1.set_xlim(0, 5)  # Extended to 0-5 days as requested
+ax1.set_xlim(0, 2)  # ~1.66 days data
 ax1.set_ylim(0, 1.05)
+ax1.grid(True, alpha=0.3, linestyle='-', linewidth=0.5)
 
-# X-axis: 0-5 days
-xticks_a = np.arange(0, 6, 1)  # 0, 1, 2, 3, 4, 5
+xticks_a = np.arange(0, 2.5, 0.5)
 ax1.set_xticks(xticks_a)
-ax1.set_xticklabels([str(int(x)) for x in xticks_a], fontsize=9)
-ax1.tick_params(labelsize=9)
+ax1.set_xticklabels([f'{x:.1f}' for x in xticks_a], fontsize=9)
+ax1.tick_params(labelsize=9, direction='out', length=3)
 
 # ══════════════════════════════════════════════════════════════
-#  (b) SHORT-TERM CYCLE - Extended to 24 hours
+#  (b) SHORT-TERM CYCLE - 24 hours
 # ══════════════════════════════════════════════════════════════
 
-# Show 24 hours (or full data if less) to see periodic patterns
-n_show_b = min(24 * samples_per_hour, n_samples)  # 24 hours
+n_show_b = min(24 * samples_per_hour, n_samples)
 feature_period = feature[:n_show_b]
 time_hours = np.arange(n_show_b) / samples_per_hour
 
-ax2.plot(time_hours, feature_period, color=C_ORANGE, linewidth=0.9)
+ax2.plot(time_hours, feature_period, color=C_ORANGE, linewidth=0.8)
 
 ax2.set_ylabel('Feature value', fontsize=10)
 ax2.set_xlim(0, n_show_b / samples_per_hour)
+ax2.grid(True, alpha=0.3, linestyle='-', linewidth=0.5)
 
 xticks_b = np.arange(0, n_show_b / samples_per_hour + 1, 4)
 ax2.set_xticks(xticks_b)
 ax2.set_xticklabels([str(int(x)) for x in xticks_b], fontsize=9)
-ax2.tick_params(labelsize=9)
+ax2.tick_params(labelsize=9, direction='out', length=3)
 
 # ══════════════════════════════════════════════════════════════
-#  (c) INTRA-PERIOD PATTERN - Extended x-axis with time labels
+#  (c) INTRA-PERIOD PATTERN OVERLAY
 # ══════════════════════════════════════════════════════════════
 
 n_periods = n_samples // samples_per_period
@@ -100,31 +103,29 @@ for i in range(min(4, n_periods)):
 
 ax3.set_ylabel('Feature value', fontsize=10)
 ax3.set_xlim(0, samples_per_period)
+ax3.grid(True, alpha=0.3, linestyle='-', linewidth=0.5)
 
-# Extended x-axis with specific time labels (HH:MM format)
-hour_ticks = np.arange(0, samples_per_period + 1, 60)  # Every hour
+hour_ticks = np.arange(0, samples_per_period + 1, 60)
 hour_labels = [f'{i//60}:00' for i in hour_ticks]
 ax3.set_xticks(hour_ticks)
-ax3.set_xticklabels(hour_labels, fontsize=8)
+ax3.set_xticklabels(hour_labels, fontsize=9)
 
-ax3.legend(loc='upper left', fontsize=8, ncol=1, framealpha=0.9, handlelength=1.5)
-ax3.tick_params(labelsize=9)
+ax3.legend(loc='upper left', fontsize=8, ncol=1, framealpha=0.95,
+           edgecolor='#cccccc', handlelength=1.5, labelspacing=0.3)
+ax3.tick_params(labelsize=9, direction='out', length=3)
 
 # ══════════════════════════════════════════════════════════════
 #  SUBPLOT LABELS
 # ══════════════════════════════════════════════════════════════
 
-# (a) - Long-term in DAYS
 ax1.text(0.5, -0.16, '(a) Time interval (day)', transform=ax1.transAxes,
          fontsize=10, ha='center')
 
-# (b) - Short-term with colored "hour"
 ax2.text(0.5, -0.16, '(b) Time interval (', transform=ax2.transAxes,
          fontsize=10, ha='right')
 ax2.text(0.5, -0.16, 'hour)', transform=ax2.transAxes,
          fontsize=10, ha='left', color=C_ORANGE, fontweight='bold')
 
-# (c) - Intra-period with colored "minute"
 ax3.text(0.44, -0.13, '(c) Time interval (', transform=ax3.transAxes,
          fontsize=10, ha='right')
 ax3.text(0.44, -0.13, 'minute)', transform=ax3.transAxes,
