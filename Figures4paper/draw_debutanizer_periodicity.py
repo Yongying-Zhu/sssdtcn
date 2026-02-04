@@ -1,7 +1,6 @@
 """
 Debutanizer Dataset Multi-scale Periodicity Visualization
-Shows that the feature to be imputed has periodic patterns at different time scales.
-Follows the template style exactly.
+Feature: u7 (selected for strongest periodicity - autocorr=0.424)
 """
 import matplotlib
 matplotlib.use('Agg')
@@ -9,138 +8,127 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # ══════════════════════════════════════════════════════════════
-#  LOAD DATA
+#  LOAD DATA - Select u7 (best periodicity, autocorr=0.424)
 # ══════════════════════════════════════════════════════════════
 
 data = np.loadtxt('/home/user/sssdtcn/debutanizer_data.txt', skiprows=5)
-# Select y (target variable - butane content)
-y = data[:, 7]
-n_samples = len(y)
+# u7 is column index 6 (0-indexed: u1=0, u2=1, ..., u7=6)
+feature = data[:, 6]
+feature_name = 'u7 (Butane concentration)'
+n_samples = len(feature)
 
-# Time parameters (assuming 1-minute sampling)
+# Time parameters
 samples_per_hour = 60
-samples_per_period = 480  # 8 hours = one operational period
+samples_per_day = samples_per_hour * 24  # 1440 samples per day
+samples_per_period = 480  # 8 hours for period overlay
 
 # ══════════════════════════════════════════════════════════════
-#  CREATE FIGURE (exact template layout)
+#  CREATE FIGURE
 # ══════════════════════════════════════════════════════════════
 
 fig = plt.figure(figsize=(10, 7.5))
 
-# Layout matching template
-ax1 = fig.add_axes([0.08, 0.58, 0.40, 0.35])   # (a) top-left
-ax2 = fig.add_axes([0.56, 0.58, 0.40, 0.35])   # (b) top-right
-ax3 = fig.add_axes([0.08, 0.10, 0.88, 0.38])   # (c) bottom full width
+ax1 = fig.add_axes([0.08, 0.58, 0.40, 0.35])
+ax2 = fig.add_axes([0.56, 0.58, 0.40, 0.35])
+ax3 = fig.add_axes([0.08, 0.10, 0.88, 0.38])
 
-# Colors matching template
-C_BLUE = '#4A90D9'    # Long-term (blue)
-C_GRAY = '#888888'    # Reference (gray)
-C_ORANGE = '#E8853D'  # Short-term (orange)
+C_GRAY = '#888888'
+C_ORANGE = '#E8853D'
 
 # ══════════════════════════════════════════════════════════════
-#  TITLE with Long-term / Short-term labels (like template)
+#  TITLE
 # ══════════════════════════════════════════════════════════════
 
-fig.text(0.30, 0.96, 'Butane content in Debutanizer', fontsize=12, fontweight='bold', ha='center')
-fig.text(0.72, 0.96, 'Long-term', fontsize=11, fontweight='bold', color=C_BLUE, ha='center')
-fig.text(0.85, 0.96, 'Short-term', fontsize=11, fontweight='bold', color=C_ORANGE, ha='center')
+fig.text(0.50, 0.96, f'Feature {feature_name} in Debutanizer',
+         fontsize=13, fontweight='bold', ha='center')
 
 # ══════════════════════════════════════════════════════════════
-#  (a) LONG-TERM TREND - Shows multiple periods
+#  (a) LONG-TERM TREND - in DAYS (no blue line, only gray)
 # ══════════════════════════════════════════════════════════════
 
-# Show entire dataset with hour-based x-axis
-time_hours = np.arange(n_samples) / samples_per_hour
-y_scaled = y.copy()
+time_days = np.arange(n_samples) / samples_per_day
 
-# Plot main line (blue)
-ax1.plot(time_hours, y_scaled, color=C_BLUE, linewidth=0.8, alpha=0.95)
+# Only gray line showing entire dataset trend
+ax1.plot(time_days, feature, color=C_GRAY, linewidth=0.8, alpha=0.9)
 
-# Plot shifted version to show periodicity (gray)
-shift = samples_per_period
-y_shifted = np.roll(y_scaled, -shift)
-time_shifted = time_hours[:-shift]
-ax1.plot(time_shifted, y_shifted[:len(time_shifted)], color=C_GRAY, linewidth=0.7, alpha=0.6)
-
-ax1.set_ylabel('Butane content', fontsize=10)
-ax1.set_xlim(0, 40)
-
-# X-axis ticks as period markers
-period_hours = 8
-xticks = np.arange(0, 41, period_hours)
-ax1.set_xticks(xticks)
-xticklabels = [f'P{i+1}' for i in range(len(xticks))]
-xticklabels[0] = '0'
-ax1.set_xticklabels(xticklabels, fontsize=9)
-
-ax1.tick_params(labelsize=9)
+ax1.set_ylabel('Feature value', fontsize=10)
+ax1.set_xlim(0, 5)  # Extended to 0-5 days as requested
 ax1.set_ylim(0, 1.05)
 
+# X-axis: 0-5 days
+xticks_a = np.arange(0, 6, 1)  # 0, 1, 2, 3, 4, 5
+ax1.set_xticks(xticks_a)
+ax1.set_xticklabels([str(int(x)) for x in xticks_a], fontsize=9)
+ax1.tick_params(labelsize=9)
+
 # ══════════════════════════════════════════════════════════════
-#  (b) SHORT-TERM CYCLE - One period as continuous line (like template)
+#  (b) SHORT-TERM CYCLE - Extended to 24 hours
 # ══════════════════════════════════════════════════════════════
 
-# Show one complete period (like one week in template)
-n_show = samples_per_period  # 8 hours
-y_period = y[:n_show]
-time_period = np.arange(n_show) / samples_per_hour
+# Show 24 hours (or full data if less) to see periodic patterns
+n_show_b = min(24 * samples_per_hour, n_samples)  # 24 hours
+feature_period = feature[:n_show_b]
+time_hours = np.arange(n_show_b) / samples_per_hour
 
-ax2.plot(time_period, y_period, color=C_ORANGE, linewidth=1.0)
+ax2.plot(time_hours, feature_period, color=C_ORANGE, linewidth=0.9)
 
-ax2.set_ylabel('Butane content', fontsize=10)
-ax2.set_xlim(0, 8)
+ax2.set_ylabel('Feature value', fontsize=10)
+ax2.set_xlim(0, n_show_b / samples_per_hour)
 
-# X-axis ticks as hours
-xticks_b = np.arange(0, 9, 1)
+xticks_b = np.arange(0, n_show_b / samples_per_hour + 1, 4)
 ax2.set_xticks(xticks_b)
-ax2.set_xticklabels(['0h', '1h', '2h', '3h', '4h', '5h', '6h', '7h', '8h'], fontsize=9)
-
+ax2.set_xticklabels([str(int(x)) for x in xticks_b], fontsize=9)
 ax2.tick_params(labelsize=9)
 
 # ══════════════════════════════════════════════════════════════
-#  (c) INTRA-PERIOD PATTERN - Multiple periods overlaid (like weekdays)
+#  (c) INTRA-PERIOD PATTERN - Extended x-axis with time labels
 # ══════════════════════════════════════════════════════════════
 
 n_periods = n_samples // samples_per_period
 time_minutes = np.arange(samples_per_period)
 
-# Period colors matching template weekday colors
-period_colors = ['#4A90D9', '#E8853D', '#2ECC71', '#E74C3C', '#9B59B6', '#34495E', '#F39C12']
-period_labels = ['Period 1', 'Period 2', 'Period 3', 'Period 4', 'Period 5']
+period_colors = ['#4A90D9', '#E8853D', '#2ECC71', '#E74C3C']
+period_labels = ['Period 1', 'Period 2', 'Period 3', 'Period 4']
 
-for i in range(min(5, n_periods)):
+for i in range(min(4, n_periods)):
     start_idx = i * samples_per_period
     end_idx = start_idx + samples_per_period
     if end_idx <= n_samples:
-        y_period = y[start_idx:end_idx]
+        y_period = feature[start_idx:end_idx]
         ax3.plot(time_minutes, y_period, color=period_colors[i],
                  linewidth=0.9, alpha=0.85, label=period_labels[i])
 
-ax3.set_ylabel('Butane content', fontsize=10)
+ax3.set_ylabel('Feature value', fontsize=10)
 ax3.set_xlim(0, samples_per_period)
 
-# X-axis: time within period (like 00:00-23:00 in template)
-hour_ticks = np.arange(0, samples_per_period + 1, 60)
+# Extended x-axis with specific time labels (HH:MM format)
+hour_ticks = np.arange(0, samples_per_period + 1, 60)  # Every hour
 hour_labels = [f'{i//60}:00' for i in hour_ticks]
 ax3.set_xticks(hour_ticks)
 ax3.set_xticklabels(hour_labels, fontsize=8)
 
-# Legend (matching template - inside plot area)
-ax3.legend(loc='upper left', fontsize=8, ncol=1, framealpha=0.9,
-           handlelength=1.5)
-
+ax3.legend(loc='upper left', fontsize=8, ncol=1, framealpha=0.9, handlelength=1.5)
 ax3.tick_params(labelsize=9)
 
 # ══════════════════════════════════════════════════════════════
-#  SUBPLOT LABELS (a), (b), (c) - matching template style
+#  SUBPLOT LABELS
 # ══════════════════════════════════════════════════════════════
 
-ax1.text(0.5, -0.18, '(a) Time interval (period)', transform=ax1.transAxes,
+# (a) - Long-term in DAYS
+ax1.text(0.5, -0.16, '(a) Time interval (day)', transform=ax1.transAxes,
          fontsize=10, ha='center')
-ax2.text(0.5, -0.18, '(b) Time interval (hours)', transform=ax2.transAxes,
-         fontsize=10, ha='center', color=C_ORANGE)
-ax3.text(0.5, -0.15, '(c) Time interval (minutes)', transform=ax3.transAxes,
-         fontsize=10, ha='center', color=C_ORANGE)
+
+# (b) - Short-term with colored "hour"
+ax2.text(0.5, -0.16, '(b) Time interval (', transform=ax2.transAxes,
+         fontsize=10, ha='right')
+ax2.text(0.5, -0.16, 'hour)', transform=ax2.transAxes,
+         fontsize=10, ha='left', color=C_ORANGE, fontweight='bold')
+
+# (c) - Intra-period with colored "minute"
+ax3.text(0.44, -0.13, '(c) Time interval (', transform=ax3.transAxes,
+         fontsize=10, ha='right')
+ax3.text(0.44, -0.13, 'minute)', transform=ax3.transAxes,
+         fontsize=10, ha='left', color=C_ORANGE, fontweight='bold')
 
 # ══════════════════════════════════════════════════════════════
 #  SAVE
@@ -151,3 +139,4 @@ for ext in ('png', 'pdf'):
     fig.savefig(f'{out_path}.{ext}', dpi=300, bbox_inches='tight', facecolor='white')
 plt.close(fig)
 print(f'Saved: {out_path}.png/pdf')
+print(f'Feature selected: u7 (highest periodicity, autocorr=0.424)')
