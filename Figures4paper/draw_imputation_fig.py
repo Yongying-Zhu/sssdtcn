@@ -1,6 +1,7 @@
 """
 Figure 4: Diffusion-based Time Series Imputation Process.
 Exact template replication - only color changed from blue to orange.
+6 grids + 3 operators + ε model + legend (matching template exactly)
 """
 import matplotlib
 matplotlib.use('Agg')
@@ -9,7 +10,7 @@ from matplotlib.patches import Rectangle, Circle, FancyBboxPatch
 import numpy as np
 
 # ══════════════════════════════════════════════════════════════
-#  CONFIGURATION (matching template exactly)
+#  CONFIGURATION
 # ══════════════════════════════════════════════════════════════
 
 ROWS, COLS = 5, 5
@@ -27,7 +28,7 @@ MASK = np.array([
 ])
 
 # Colors - Claude orange instead of blue
-C_OBS  = '#E8853D'   # Claude orange (was blue)
+C_OBS  = '#E8853D'   # Claude orange
 C_MASK = '#808080'   # Gray
 C_WH   = '#FFFFFF'   # White
 C_BD   = '#000000'   # Black border
@@ -80,58 +81,56 @@ def line(ax, x1, y1, x2, y2, c=C_ARR, lw=0.7, ls='-'):
 
 
 # ══════════════════════════════════════════════════════════════
-#  EXACT TEMPLATE LAYOUT - 7 grids + 3 operators + ε + legend
+#  EXACT TEMPLATE LAYOUT - 6 grids + 3 operators + ε + legend
 # ══════════════════════════════════════════════════════════════
 
-fig, ax = plt.subplots(figsize=(7.0, 5.5))
-ax.set_xlim(-0.4, 5.8)
-ax.set_ylim(-1.3, 3.8)
+fig, ax = plt.subplots(figsize=(6.0, 4.5))
+ax.set_xlim(-0.4, 5.0)
+ax.set_ylim(-1.0, 3.2)
 ax.axis('off')
 ax.set_aspect('equal')
 
 # ══════════════════════════════════════════════════════════════
-#  POSITIONS (matching template)
+#  POSITIONS (matching template exactly)
 # ══════════════════════════════════════════════════════════════
 
 # Left column
 x_data = 0.0
-y_data = 2.4      # Grid 1: original data (top-left)
-y_mask = 1.2      # Grid 2: mask (below data)
+y_data = 1.8      # Grid 1: original data (top-left)
+y_mask = 0.7      # Grid 2: mask (below data)
 
 # Middle column
-x_zm = 1.6        # Grid 3: Z⊙M
-y_zm = 1.2
+x_zm = 1.5        # Grid 3: Z⊙M
+y_zm = 0.7
 
-x_mid2 = 2.5      # Grid 4: middle-right full grid
-y_mid2 = 1.2
+x_mid2 = 2.4      # Grid 4: middle-right full grid
+y_mid2 = 0.7
 
-# Right column - top (two imputed grids stacked)
-x_imp = 4.0
-y_imp1 = 2.65     # Grid 5: imputed top
-y_imp2 = 1.75     # Grid 6: imputed bottom
+# Right column
+x_imp = 3.6       # Grid 5: imputed (top-right)
+y_imp = 1.8
 
-# Right column - bottom
-x_final = 4.0
-y_final = 0.0     # Grid 7: final output (full)
+x_final = 3.6     # Grid 6: final output (bottom-right)
+y_final = -0.3
 
-# ε model position
-eps_x = 2.0
-eps_y = 2.9
-eps_w = 0.7
-eps_h = 0.5
+# ε model position (top center)
+eps_x = 1.7
+eps_y = 2.3
+eps_w = 0.65
+eps_h = 0.45
 
 # Operators
-op1_x = 1.15      # ⊙ (left, between mask and Z⊙M)
-op1_y = 1.6
+op1_x = 1.05      # ⊙ (left)
+op1_y = 1.1
 
-op2_x = 4.85      # ⊙ (right side)
-op2_y = 1.4
+op2_x = 4.45      # ⊙ (right)
+op2_y = 1.1
 
-op3_x = 4.85      # + (below ⊙)
-op3_y = 0.7
+op3_x = 4.45      # + (below ⊙)
+op3_y = 0.45
 
 # ══════════════════════════════════════════════════════════════
-#  DRAW 7 GRIDS
+#  DRAW 6 GRIDS
 # ══════════════════════════════════════════════════════════════
 
 # Grid 1: Original data (top-left)
@@ -146,13 +145,10 @@ draw_grid(ax, x_zm, y_zm, MASK, 'masked')
 # Grid 4: Full grid (middle-right)
 draw_grid(ax, x_mid2, y_mid2, MASK, 'full')
 
-# Grid 5: Imputed (right-top-upper)
-draw_grid(ax, x_imp, y_imp1, MASK, 'imputed')
+# Grid 5: Imputed (top-right) - only ONE
+draw_grid(ax, x_imp, y_imp, MASK, 'imputed')
 
-# Grid 6: Imputed (right-top-lower)
-draw_grid(ax, x_imp, y_imp2, MASK, 'imputed')
-
-# Grid 7: Final output (right-bottom, full)
+# Grid 6: Final output (bottom-right, full)
 draw_grid(ax, x_final, y_final, MASK, 'full')
 
 # ══════════════════════════════════════════════════════════════
@@ -171,26 +167,24 @@ draw_op(ax, op2_x, op2_y, '⊙')
 draw_op(ax, op3_x, op3_y, '+')
 
 # ══════════════════════════════════════════════════════════════
-#  ARROWS (matching template)
+#  ARROWS (matching template exactly)
 # ══════════════════════════════════════════════════════════════
 G = 0.04
 
 # --- Dashed path (top): data → ε → imputed ---
-# From data top-right corner, up and right to ε
-line(ax, x_data + GW, y_data + GH/2 + 0.1, x_data + GW + 0.1, y_data + GH + 0.15, c=C_ARR, ls='--')
-line(ax, x_data + GW + 0.1, y_data + GH + 0.15, eps_x - 0.05, y_data + GH + 0.15, c=C_ARR, ls='--')
-arrow(ax, eps_x - 0.05, y_data + GH + 0.15, eps_x, eps_y + eps_h/2, c=C_ARR, ls='--')
+dash_y = y_data + GH + 0.12
+# From data top-right, up then right to ε
+line(ax, x_data + GW, y_data + GH/2 + 0.1, x_data + GW + 0.08, dash_y, c=C_ARR, ls='--')
+line(ax, x_data + GW + 0.08, dash_y, eps_x - 0.05, dash_y, c=C_ARR, ls='--')
+arrow(ax, eps_x - 0.05, dash_y, eps_x, eps_y + eps_h/2, c=C_ARR, ls='--')
 
-# From ε to imputed grids (dashed)
-line(ax, eps_x + eps_w, eps_y + eps_h/2, eps_x + eps_w + 0.1, y_data + GH + 0.15, c=C_ARR, ls='--')
-line(ax, eps_x + eps_w + 0.1, y_data + GH + 0.15, x_imp + GW + 0.1, y_data + GH + 0.15, c=C_ARR, ls='--')
-# Arrow down to top imputed grid
-arrow(ax, x_imp + GW + 0.1, y_data + GH + 0.15, x_imp + GW, y_imp1 + GH/2, c=C_ARR, ls='--')
+# From ε right to imputed
+line(ax, eps_x + eps_w, eps_y + eps_h/2, eps_x + eps_w + 0.05, dash_y, c=C_ARR, ls='--')
+line(ax, eps_x + eps_w + 0.05, dash_y, x_imp + GW + 0.08, dash_y, c=C_ARR, ls='--')
+arrow(ax, x_imp + GW + 0.08, dash_y, x_imp + GW, y_imp + GH/2, c=C_ARR, ls='--')
 
-# Dashed line between two imputed grids
-line(ax, x_imp + GW + 0.15, y_imp1 + GH/2, x_imp + GW + 0.15, y_imp2 + GH/2, c=C_ARR, ls='--')
+# --- Solid paths (main flow) ---
 
-# --- Solid paths ---
 # Data down to ⊙
 line(ax, x_data + GW/2, y_data, x_data + GW/2, op1_y + 0.2, c=C_ARR)
 arrow(ax, x_data + GW/2, op1_y + 0.2, op1_x - 0.08, op1_y + 0.05, c=C_ARR)
@@ -205,24 +199,24 @@ arrow(ax, op1_x + 0.11 + G, op1_y, x_zm - G, y_zm + GH/2, c=C_ARR)
 line(ax, x_zm + GW/2, y_zm + GH, x_zm + GW/2, eps_y + eps_h/2, c=C_ARR)
 arrow(ax, x_zm + GW/2, eps_y + eps_h/2, eps_x - G, eps_y + eps_h/2, c=C_ARR)
 
-# ε to middle-right grid (down)
+# ε to middle-right grid
 line(ax, eps_x + eps_w, eps_y + eps_h/2, x_mid2 + GW/2, eps_y + eps_h/2, c=C_ARR)
 arrow(ax, x_mid2 + GW/2, eps_y + eps_h/2, x_mid2 + GW/2, y_mid2 + GH + G, c=C_ARR)
 
-# Middle-right to ⊙ (long horizontal line)
+# Middle-right to ⊙ (long horizontal)
 arrow(ax, x_mid2 + GW + G, y_mid2 + GH/2, op2_x - 0.11 - G, op2_y, c=C_ARR)
 
 # ⊙ to + (dashed)
 arrow(ax, op2_x, op2_y - 0.11 - G, op3_x, op3_y + 0.11 + G, c=C_ARR, ls='--')
 
-# From imputed area down to +
-line(ax, x_imp + GW + 0.15, y_imp2 + GH/2, x_imp + GW + 0.15, op3_y + 0.3, c=C_ARR, ls='--')
-arrow(ax, x_imp + GW + 0.15, op3_y + 0.3, op3_x + 0.11 + G, op3_y, c=C_ARR, ls='--')
+# Imputed down to + (dashed)
+line(ax, x_imp + GW + 0.12, y_imp + GH/2, x_imp + GW + 0.12, op3_y + 0.15, c=C_ARR, ls='--')
+arrow(ax, x_imp + GW + 0.12, op3_y + 0.15, op3_x + 0.11 + G, op3_y, c=C_ARR, ls='--')
 
 # + to final grid
-line(ax, op3_x, op3_y - 0.11 - G, op3_x, y_final + GH + 0.1, c=C_ARR)
-line(ax, op3_x, y_final + GH + 0.1, x_final + GW/2, y_final + GH + 0.1, c=C_ARR)
-arrow(ax, x_final + GW/2, y_final + GH + 0.1, x_final + GW/2, y_final + GH, c=C_ARR)
+line(ax, op3_x, op3_y - 0.11 - G, op3_x, y_final + GH + 0.08, c=C_ARR)
+line(ax, op3_x, y_final + GH + 0.08, x_final + GW/2, y_final + GH + 0.08, c=C_ARR)
+arrow(ax, x_final + GW/2, y_final + GH + 0.08, x_final + GW/2, y_final + GH, c=C_ARR)
 
 # ══════════════════════════════════════════════════════════════
 #  LABELS
@@ -230,41 +224,40 @@ arrow(ax, x_final + GW/2, y_final + GH + 0.1, x_final + GW/2, y_final + GH, c=C_
 
 # ~ between data and mask
 ax.text(x_data + GW/2, (y_data + y_mask + GH) / 2, '~',
-        ha='center', va='center', fontsize=11, color='#000', fontweight='bold')
-
-# L dimension (vertical, left of mask)
-lx = x_data - 0.12
-ax.annotate('', xy=(lx, y_mask), xytext=(lx, y_mask + GH),
-    arrowprops=dict(arrowstyle='<->', color='#000', lw=0.5))
-ax.text(lx - 0.12, y_mask + GH/2, 'L', ha='center', va='center',
-        fontsize=9, fontstyle='italic', color='#000')
+        ha='center', va='center', fontsize=10, color='#000', fontweight='bold')
 
 # K dimension (horizontal, below mask)
 ky = y_mask - 0.12
 ax.annotate('', xy=(x_data, ky), xytext=(x_data + GW, ky),
     arrowprops=dict(arrowstyle='<->', color='#000', lw=0.5))
-ax.text(x_data + GW/2, ky - 0.12, 'K', ha='center', fontsize=9,
+ax.text(x_data + GW/2, ky - 0.10, 'K', ha='center', fontsize=8,
         fontstyle='italic', color='#000')
 
+# L dimension (vertical, left of mask)
+lx = x_data - 0.10
+ax.annotate('', xy=(lx, y_mask), xytext=(lx, y_mask + GH),
+    arrowprops=dict(arrowstyle='<->', color='#000', lw=0.5))
+ax.text(lx - 0.10, y_mask + GH/2, 'L', ha='center', va='center',
+        fontsize=8, fontstyle='italic', color='#000')
+
 # ══════════════════════════════════════════════════════════════
-#  LEGEND BOX (exactly as template)
+#  LEGEND BOX (matching template)
 # ══════════════════════════════════════════════════════════════
-lgx = 1.4
+lgx = 1.3
 lgy = -0.15
-lg_w = 1.15
-lg_h = 0.80
-sw = 0.12
+lg_w = 1.05
+lg_h = 0.72
+sw = 0.11
 
 # Legend box
 ax.add_patch(Rectangle((lgx, lgy), lg_w, lg_h, fc='white', ec='#000', lw=0.5, zorder=3))
 
-# Legend items (4 rows)
-row_h = 0.18
+# Legend items
 items = [
-    (lgx + 0.06, lgy + lg_h - 0.20, C_OBS, None, 'Observed data'),
-    (lgx + 0.06, lgy + lg_h - 0.38, C_MASK, None, 'Mask'),
-    (lgx + 0.06, lgy + lg_h - 0.56, None, 'imp', 'Imputed data'),
-    (lgx + 0.06, lgy + lg_h - 0.74, None, 'eps', 'ε  Model'),
+    (lgx + 0.05, lgy + lg_h - 0.18, C_OBS, None, 'Observed data'),
+    (lgx + 0.05, lgy + lg_h - 0.34, C_MASK, None, 'Mask'),
+    (lgx + 0.05, lgy + lg_h - 0.50, None, 'imp', 'Imputed data'),
+    (lgx + 0.05, lgy + lg_h - 0.66, None, 'eps', 'ε  Model'),
 ]
 
 for ix, iy, fc, sp_type, txt in items:
@@ -276,11 +269,11 @@ for ix, iy, fc, sp_type, txt in items:
         ax.add_patch(FancyBboxPatch((ix, iy), sw, sw,
                      boxstyle='round,pad=0.01', fc=C_MBG, ec=C_MBD, lw=0.4, zorder=4))
         ax.text(ix + sw/2, iy + sw/2, 'ε', ha='center', va='center',
-                fontsize=7, fontweight='bold', fontstyle='italic', color='#000', zorder=5)
+                fontsize=6, fontweight='bold', fontstyle='italic', color='#000', zorder=5)
     else:
         ax.add_patch(Rectangle((ix, iy), sw, sw, fc=fc, ec=C_BD, lw=0.3, zorder=4))
 
-    ax.text(ix + sw + 0.05, iy + sw/2, txt, va='center', fontsize=7, color='#000', zorder=4)
+    ax.text(ix + sw + 0.04, iy + sw/2, txt, va='center', fontsize=6.5, color='#000', zorder=4)
 
 # ══════════════════════════════════════════════════════════════
 #  SAVE
@@ -291,4 +284,4 @@ for ext in ('png', 'pdf'):
     fig.savefig(f'{out}/fig4_imputation_process.{ext}',
                 dpi=300, bbox_inches='tight', facecolor='white')
 plt.close(fig)
-print('Fig 4 saved - 7 grids, 3 operators, orange color.')
+print('Fig 4 saved - 6 grids, 3 operators, orange color.')
