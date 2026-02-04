@@ -1,6 +1,6 @@
 """
 Architecture diagrams for Implicit-Explicit Diffusion Model paper.
-v5: All arrows properly sized, no text-border overlap, Output not clipped.
+v6: Fix merge routing horizontal segments, Output Proj spacing, conv entry arrow stems.
 """
 import matplotlib
 matplotlib.use('Agg')
@@ -54,8 +54,8 @@ def SR(ax, x, y, w, h, fc, alpha=0.35):
 #  Fixes: all arrows long enough, proper gaps between box edge and arrowhead
 # ════════════════════════════════════════════════════════════════
 def fig1():
-    fig, ax = plt.subplots(figsize=(15, 6))
-    ax.set_xlim(-0.3, 15.5)
+    fig, ax = plt.subplots(figsize=(17, 6))
+    ax.set_xlim(-0.3, 17.0)
     ax.set_ylim(-0.5, 5.5)
     ax.axis('off')
 
@@ -64,17 +64,17 @@ def fig1():
     yt = 3.7
     yb = 0.9
 
-    # x positions (more spread out for proper arrow lengths)
+    # x positions — widened for visible arrows everywhere
     x_in   = 0.7
-    x_ipr  = 2.8;  x_me = 2.8
-    x_add1 = 4.8
-    x_imp  = 6.8;  x_exp = 6.8
-    x_fu   = 8.9
-    x_add2 = 10.5
-    x_te   = 10.5
-    x_res  = 11.9
-    x_op   = 13.3
-    x_out  = 14.8
+    x_ipr  = 3.0;  x_me = 3.0
+    x_add1 = 5.0
+    x_imp  = 7.2;  x_exp = 7.2
+    x_fu   = 10.2
+    x_add2 = 11.7
+    x_te   = 11.7
+    x_res  = 13.2
+    x_op   = 14.9
+    x_out  = 16.3
 
     # Box widths
     w_in = 1.4; w_pr = 1.6; w_br = 2.0; w_fu = 1.5; w_te = 1.2
@@ -98,41 +98,42 @@ def fig1():
     B(ax, x_op,  yc,  w_op, H, 'Output\nProj',       C_PR, C_PR_E, fs=8)
     B(ax, x_out, yc,  w_out, H, 'Output',             C_IN, C_IN_E, fs=8)
 
-    # ── ARROWS (every connection has a proper visible arrow) ──
-    G = 0.08  # gap between box edge and arrow start/end for clarity
+    # ── ARROWS ──
+    G = 0.08
 
-    # Input → fork (vertical line, then horizontal arrows into boxes)
+    # Input → fork
     fork_x = x_in + w_in/2 + 0.3
     LN(ax, x_in+w_in/2, yc, fork_x, yc)
     LN(ax, fork_x, yc, fork_x, yt)
-    AR(ax, fork_x, yt, x_ipr-w_pr/2-G, yt)          # → Input Proj
+    AR(ax, fork_x, yt, x_ipr-w_pr/2-G, yt)
     LN(ax, fork_x, yc, fork_x, yb)
-    AR(ax, fork_x, yb, x_me-w_pr/2-G, yb)            # → Mask Embed
+    AR(ax, fork_x, yb, x_me-w_pr/2-G, yb)
 
-    # Input Proj → (+)
-    LN(ax, x_ipr+w_pr/2, yt, x_add1-0.35, yt)
-    LN(ax, x_add1-0.35, yt, x_add1-0.35, yc+0.35)
-    AR(ax, x_add1-0.35, yc+0.35, x_add1-0.14, yc+0.14)
-    # Mask Embed → (+)
-    LN(ax, x_me+w_pr/2, yb, x_add1-0.35, yb)
-    LN(ax, x_add1-0.35, yb, x_add1-0.35, yc-0.35)
-    AR(ax, x_add1-0.35, yc-0.35, x_add1-0.14, yc-0.14)
+    # Input Proj → (+) via L-shape
+    route1 = x_add1 - 0.35
+    LN(ax, x_ipr+w_pr/2, yt, route1, yt)
+    LN(ax, route1, yt, route1, yc+0.35)
+    AR(ax, route1, yc+0.35, x_add1-0.14, yc+0.14)
+    # Mask Embed → (+) via L-shape
+    LN(ax, x_me+w_pr/2, yb, route1, yb)
+    LN(ax, route1, yb, route1, yc-0.35)
+    AR(ax, route1, yc-0.35, x_add1-0.14, yc-0.14)
 
     # (+) → split to branches
     split_x = x_add1 + 0.20 + 0.30
     LN(ax, x_add1+0.20, yc, split_x, yc)
     LN(ax, split_x, yc, split_x, yt)
-    AR(ax, split_x, yt, x_imp-w_br/2-G, yt)           # → Implicit
+    AR(ax, split_x, yt, x_imp-w_br/2-G, yt)
     LN(ax, split_x, yc, split_x, yb)
-    AR(ax, split_x, yb, x_exp-w_br/2-G, yb)           # → Explicit
+    AR(ax, split_x, yb, x_exp-w_br/2-G, yb)
 
-    # Branches → Gated Fusion
-    merge_x = x_fu - w_fu/2 - 0.30
-    LN(ax, x_imp+w_br/2, yt, merge_x, yt)
-    LN(ax, merge_x, yt, merge_x, yc)
-    AR(ax, merge_x, yc, x_fu-w_fu/2-G, yc)            # → Fusion
-    LN(ax, x_exp+w_br/2, yb, merge_x, yb)
-    LN(ax, merge_x, yb, merge_x, yc)
+    # Branches → Gated Fusion  (KEY FIX: visible horizontal segment first)
+    merge_x = x_imp + w_br/2 + 0.7   # 0.7 past module right edge
+    LN(ax, x_imp+w_br/2, yt, merge_x, yt)   # horizontal from Implicit right
+    LN(ax, merge_x, yt, merge_x, yc)          # vertical down to center
+    AR(ax, merge_x, yc, x_fu-w_fu/2-G, yc)   # arrow into Fusion
+    LN(ax, x_exp+w_br/2, yb, merge_x, yb)   # horizontal from Explicit right
+    LN(ax, merge_x, yb, merge_x, yc)          # vertical up to center
 
     # Fusion → (+time)
     AR(ax, x_fu+w_fu/2+G, yc, x_add2-0.20-G, yc)
@@ -140,12 +141,12 @@ def fig1():
     AR(ax, x_te, yc+1.3-H*0.9/2-G, x_add2, yc+0.20+G)
     # (+time) → Residual
     AR(ax, x_add2+0.20+G, yc, x_res-w_res/2-G, yc)
-    # Residual → Output Proj
+    # Residual → Output Proj (properly spaced)
     AR(ax, x_res+w_res/2+G, yc, x_op-w_op/2-G, yc)
     # Output Proj → Output
     AR(ax, x_op+w_op/2+G, yc, x_out-w_out/2-G, yc)
 
-    # labels (clearly in empty space)
+    # labels
     ax.text(x_imp, yt+H*1.2/2+0.2, 'Implicit Branch', ha='center',
             fontsize=7.5, color='#E65100', fontstyle='italic', fontweight='bold')
     ax.text(x_exp, yb-H*1.2/2-0.2, 'Explicit Branch', ha='center',
@@ -166,8 +167,8 @@ def fig1():
 #  Fixes: wider gaps for internal arrows, Output fully visible, more spacing
 # ════════════════════════════════════════════════════════════════
 def fig2():
-    fig, ax = plt.subplots(figsize=(16, 5.5))
-    ax.set_xlim(-0.3, 16.0)
+    fig, ax = plt.subplots(figsize=(18, 5.5))
+    ax.set_xlim(-0.3, 18.0)
     ax.set_ylim(-1.2, 4.8)
     ax.axis('off')
 
@@ -178,16 +179,17 @@ def fig2():
     y_drop = yc - 0.70
     y_plus = y_drop - 0.45
     y_route = y_plus - 0.30
-    G = 0.06  # gap
+    G = 0.06
 
     x_in = 0.5; x_li = 2.0
-    conv_step = 1.75
-    x_c0 = 3.9
+    conv_step = 1.85
+    x_c0 = 4.0
     dilations = [1, 2, 4, 8, 16, 32]
     x_convs = [x_c0 + i * conv_step for i in range(6)]
-    x_lo = x_convs[-1] + conv_step + 0.2
-    x_out = x_lo + 1.6
+    x_lo = x_convs[-1] + conv_step + 0.3
+    x_out = x_lo + 1.8
     bw = 1.2
+    rt_off = 0.40  # routing column offset from box left edge (visible stem)
 
     # shaded background
     SR(ax, x_c0-bw/2-0.2, y_plus-0.35,
@@ -204,7 +206,7 @@ def fig2():
         B(ax, xc, y_gelu, bw, 0.40, 'GELU', C_AC, C_AC_E, fs=7, fw='normal')
         B(ax, xc, y_drop, bw, 0.40, 'Dropout', C_DR, C_DR_E, fs=7, fw='normal')
 
-        # Internal arrows with proper gap
+        # Internal arrows
         AR(ax, xc, y_conv-0.50/2-G, xc, y_gelu+0.40/2+G)
         AR(ax, xc, y_gelu-0.40/2-G, xc, y_drop+0.40/2+G)
 
@@ -223,31 +225,34 @@ def fig2():
         ax.text(xc, y_conv+0.50/2+0.15, f'α{chr(8321+i)}',
                 fontsize=7, color='#c0392c', ha='center', fontstyle='italic')
 
-    # ── Inter-block connections ──
-    # Linear → first block
-    LN(ax, x_li+1.2/2, yc, x_convs[0]-bw/2-0.15, yc)
-    LN(ax, x_convs[0]-bw/2-0.15, yc, x_convs[0]-bw/2-0.15, y_conv)
-    AR(ax, x_convs[0]-bw/2-0.15, y_conv, x_convs[0]-bw/2-G, y_conv)
+    # ── Inter-block connections (KEY FIX: visible arrow stem) ──
+    # Linear → first block: route column well left of Conv box
+    rt_col = x_convs[0] - bw/2 - rt_off
+    LN(ax, x_li+1.2/2, yc, rt_col, yc)
+    LN(ax, rt_col, yc, rt_col, y_conv)
+    AR(ax, rt_col, y_conv, x_convs[0]-bw/2-G, y_conv)
 
-    # Between blocks
+    # Between blocks: visible horizontal stem before arrowhead
     for i in range(5):
         xf = x_convs[i]; xt = x_convs[i+1]
+        rt_col = xt - bw/2 - rt_off
         LN(ax, xf, y_plus-0.13, xf, y_route)
-        LN(ax, xf, y_route, xt-bw/2-0.15, y_route)
-        LN(ax, xt-bw/2-0.15, y_route, xt-bw/2-0.15, y_conv)
-        AR(ax, xt-bw/2-0.15, y_conv, xt-bw/2-G, y_conv)
+        LN(ax, xf, y_route, rt_col, y_route)
+        LN(ax, rt_col, y_route, rt_col, y_conv)
+        AR(ax, rt_col, y_conv, xt-bw/2-G, y_conv)
 
     # Last block → Linear Out
     xl = x_convs[-1]
+    rt_col_lo = x_lo - 1.2/2 - rt_off
     LN(ax, xl, y_plus-0.13, xl, y_route)
-    LN(ax, xl, y_route, x_lo-1.2/2-0.15, y_route)
-    LN(ax, x_lo-1.2/2-0.15, y_route, x_lo-1.2/2-0.15, yc)
-    AR(ax, x_lo-1.2/2-0.15, yc, x_lo-1.2/2-G, yc)
+    LN(ax, xl, y_route, rt_col_lo, y_route)
+    LN(ax, rt_col_lo, y_route, rt_col_lo, yc)
+    AR(ax, rt_col_lo, yc, x_lo-1.2/2-G, yc)
 
-    # Linear Out / Output
+    # Linear Out / Output (wider Output box to prevent clipping)
     B(ax, x_lo, yc, 1.2, H, 'Linear\n(H→H)', C_PR, C_PR_E, fs=8)
-    B(ax, x_out, yc, 1.0, H, 'Output', C_IN, C_IN_E, fs=9)
-    AR(ax, x_lo+1.2/2+G, yc, x_out-1.0/2-G, yc)
+    B(ax, x_out, yc, 1.2, H, 'Output', C_IN, C_IN_E, fs=9)
+    AR(ax, x_lo+1.2/2+G, yc, x_out-1.2/2-G, yc)
 
     # Global skip
     skip_y = y_route - 0.45
@@ -392,6 +397,6 @@ def fig3():
 
 
 if __name__ == '__main__':
-    print('Generating v5 figures (fixed arrows, labels, sizing)...')
+    print('Generating v6 figures (merge routing, arrow stems, Output spacing)...')
     fig1(); fig2(); fig3()
     print('Done – all saved to Figures4paper/')
