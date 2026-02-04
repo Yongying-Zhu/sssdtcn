@@ -1,6 +1,6 @@
 """
 Debutanizer Dataset Multi-scale Periodicity Visualization
-Feature: u6 (selected for strongest periodicity - autocorr=0.276)
+Feature: u7 (selected for strongest periodicity - autocorr=0.424)
 """
 import matplotlib
 matplotlib.use('Agg')
@@ -8,13 +8,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # ══════════════════════════════════════════════════════════════
-#  LOAD DATA - Select u6 (best periodicity)
+#  LOAD DATA - Select u7 (best periodicity, autocorr=0.424)
 # ══════════════════════════════════════════════════════════════
 
 data = np.loadtxt('/home/user/sssdtcn/debutanizer_data.txt', skiprows=5)
-# u6 is column index 5 (0-indexed: u1=0, u2=1, ..., u6=5)
-feature = data[:, 5]
-feature_name = 'u6 (Tray temperature)'
+# u7 is column index 6 (0-indexed: u1=0, u2=1, ..., u7=6)
+feature = data[:, 6]
+feature_name = 'u7 (Butane concentration)'
 n_samples = len(feature)
 
 # Time parameters
@@ -52,14 +52,13 @@ time_days = np.arange(n_samples) / samples_per_day
 ax1.plot(time_days, feature, color=C_GRAY, linewidth=0.8, alpha=0.9)
 
 ax1.set_ylabel('Feature value', fontsize=10)
-ax1.set_xlim(0, time_days[-1])
+ax1.set_xlim(0, 5)  # Extended to 0-5 days as requested
 ax1.set_ylim(0, 1.05)
 
-# X-axis: days
-max_days = time_days[-1]
-xticks_a = np.arange(0, max_days + 0.1, 0.5)
+# X-axis: 0-5 days
+xticks_a = np.arange(0, 6, 1)  # 0, 1, 2, 3, 4, 5
 ax1.set_xticks(xticks_a)
-ax1.set_xticklabels([f'{x:.1f}' for x in xticks_a], fontsize=9)
+ax1.set_xticklabels([str(int(x)) for x in xticks_a], fontsize=9)
 ax1.tick_params(labelsize=9)
 
 # ══════════════════════════════════════════════════════════════
@@ -140,4 +139,4 @@ for ext in ('png', 'pdf'):
     fig.savefig(f'{out_path}.{ext}', dpi=300, bbox_inches='tight', facecolor='white')
 plt.close(fig)
 print(f'Saved: {out_path}.png/pdf')
-print(f'Feature selected: u6 (highest periodicity score)')
+print(f'Feature selected: u7 (highest periodicity, autocorr=0.424)')
