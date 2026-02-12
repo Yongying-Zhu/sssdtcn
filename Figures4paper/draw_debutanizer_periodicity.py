@@ -26,7 +26,8 @@ samples_per_period = 480  # 8 hours for period overlay
 #  CREATE FIGURE WITH AESTHETIC SETTINGS
 # ══════════════════════════════════════════════════════════════
 
-plt.rcParams['font.family'] = 'sans-serif'
+plt.rcParams['font.family'] = 'serif'
+plt.rcParams['font.serif'] = ['Times New Roman', 'DejaVu Serif', 'Liberation Serif']
 plt.rcParams['axes.linewidth'] = 0.8
 plt.rcParams['axes.edgecolor'] = '#333333'
 
@@ -43,7 +44,7 @@ C_ORANGE = '#E8853D'
 #  TITLE
 # ══════════════════════════════════════════════════════════════
 
-fig.text(0.50, 0.96, f'Feature {feature_name} in Debutanizer',
+fig.text(0.50, 0.96, 'Butane Concentration in Debutanizer Column',
          fontsize=14, fontweight='bold', ha='center', color='#222222')
 
 # ══════════════════════════════════════════════════════════════
@@ -54,7 +55,7 @@ time_days = np.arange(n_samples) / samples_per_day
 
 ax1.plot(time_days, feature, color=C_GRAY, linewidth=0.7, alpha=0.9)
 
-ax1.set_ylabel('Feature value', fontsize=10)
+ax1.set_ylabel('Butane concentration', fontsize=10)
 ax1.set_xlim(0, 2)  # ~1.66 days data
 ax1.set_ylim(0, 1.05)
 ax1.grid(True, alpha=0.3, linestyle='-', linewidth=0.5)
@@ -74,7 +75,7 @@ time_hours = np.arange(n_show_b) / samples_per_hour
 
 ax2.plot(time_hours, feature_period, color=C_ORANGE, linewidth=0.8)
 
-ax2.set_ylabel('Feature value', fontsize=10)
+ax2.set_ylabel('Butane concentration', fontsize=10)
 ax2.set_xlim(0, n_show_b / samples_per_hour)
 ax2.grid(True, alpha=0.3, linestyle='-', linewidth=0.5)
 
@@ -101,7 +102,7 @@ for i in range(min(4, n_periods)):
         ax3.plot(time_minutes, y_period, color=period_colors[i],
                  linewidth=0.9, alpha=0.85, label=period_labels[i])
 
-ax3.set_ylabel('Feature value', fontsize=10)
+ax3.set_ylabel('Butane concentration', fontsize=10)
 ax3.set_xlim(0, samples_per_period)
 ax3.grid(True, alpha=0.3, linestyle='-', linewidth=0.5)
 
@@ -121,15 +122,11 @@ ax3.tick_params(labelsize=9, direction='out', length=3)
 ax1.text(0.5, -0.16, '(a) Time interval (day)', transform=ax1.transAxes,
          fontsize=10, ha='center')
 
-ax2.text(0.5, -0.16, '(b) Time interval (', transform=ax2.transAxes,
-         fontsize=10, ha='right')
-ax2.text(0.5, -0.16, 'hour)', transform=ax2.transAxes,
-         fontsize=10, ha='left', color=C_ORANGE, fontweight='bold')
+ax2.text(0.5, -0.16, '(b) Time interval (hour)', transform=ax2.transAxes,
+         fontsize=10, ha='center')
 
-ax3.text(0.44, -0.13, '(c) Time interval (', transform=ax3.transAxes,
-         fontsize=10, ha='right')
-ax3.text(0.44, -0.13, 'minute)', transform=ax3.transAxes,
-         fontsize=10, ha='left', color=C_ORANGE, fontweight='bold')
+ax3.text(0.44, -0.13, '(c) Time interval (minute)', transform=ax3.transAxes,
+         fontsize=10, ha='center')
 
 # ══════════════════════════════════════════════════════════════
 #  SAVE
