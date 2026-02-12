@@ -92,7 +92,7 @@ n_periods = n_samples // samples_per_period
 time_minutes = np.arange(samples_per_period)
 
 period_colors = ['#4A90D9', '#E8853D', '#2ECC71', '#E74C3C']
-period_labels = ['Period 1', 'Period 2', 'Period 3', 'Period 4']
+period_labels = ['Period 1 (0-8h)', 'Period 2 (8-16h)', 'Period 3 (16-24h)', 'Period 4 (24-32h)']
 
 for i in range(min(4, n_periods)):
     start_idx = i * samples_per_period
@@ -111,7 +111,7 @@ hour_labels = [f'{i//60}:00' for i in hour_ticks]
 ax3.set_xticks(hour_ticks)
 ax3.set_xticklabels(hour_labels, fontsize=9)
 
-ax3.legend(loc='upper left', fontsize=8, ncol=1, framealpha=0.95,
+ax3.legend(loc='lower left', fontsize=8, ncol=1, framealpha=0.95,
            edgecolor='#cccccc', handlelength=1.5, labelspacing=0.3)
 ax3.tick_params(labelsize=9, direction='out', length=3)
 
