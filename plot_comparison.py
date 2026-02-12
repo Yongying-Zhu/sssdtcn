@@ -54,10 +54,10 @@ transformer_sru = gt_sru + np.random.randn(len(time_steps_sru)) * 0.04
 #  SUBPLOT 1: Debutanizer
 # ══════════════════════════════════════════════════════════════
 
-# Define colors for Debutanizer (Dataset 1)
+# Define colors for Debutanizer (Dataset 1) - Blue/Orange theme
 color_gt_deb = '#2E2E2E'           # Dark gray/black for GT
-color_ours_deb = '#1f77b4'         # Blue for Ours
-color_transformer_deb = '#ff7f0e'  # Orange for Transformer
+color_ours_deb = '#1f77b4'         # Standard blue for Ours
+color_transformer_deb = '#ff7f0e'  # Standard orange for Transformer
 
 # Plot GT line
 line_gt = ax1.plot(time_steps_deb, gt_deb, color=color_gt_deb, linewidth=1.8,
@@ -82,7 +82,7 @@ ax1.set_xlim(0, 200)
 ax1.grid(True, alpha=0.3, linestyle='--', linewidth=0.5)
 ax1.tick_params(labelsize=11)
 
-# Custom legend with fill patches - positioned in center-right empty space
+# Custom legend with fill patches - positioned right to avoid overlapping curves
 legend_elements_deb = [
     Patch(facecolor=color_gt_deb, edgecolor=color_gt_deb, label='GT'),
     Patch(facecolor=color_ours_deb, edgecolor=color_ours_deb, label='Ours'),
@@ -90,17 +90,17 @@ legend_elements_deb = [
     Patch(facecolor=color_transformer_deb, edgecolor=color_transformer_deb, label='Transformer'),
     Patch(facecolor=color_transformer_deb, edgecolor=color_transformer_deb, alpha=0.3, label='Error(Transformer)')
 ]
-ax1.legend(handles=legend_elements_deb, loc='upper left', bbox_to_anchor=(0.12, 0.98),
+ax1.legend(handles=legend_elements_deb, loc='upper left', bbox_to_anchor=(0.38, 0.98),
           fontsize=10, framealpha=0.95, edgecolor='gray', fancybox=False)
 
 # ══════════════════════════════════════════════════════════════
 #  SUBPLOT 2: SRU
 # ══════════════════════════════════════════════════════════════
 
-# Define colors for SRU (Dataset 2) - slightly different shade
+# Define colors for SRU (Dataset 2) - Purple/Green theme (distinctly different)
 color_gt_sru = '#2E2E2E'           # Dark gray/black for GT (same)
-color_ours_sru = '#0E5A8A'         # Darker/deeper blue for Ours
-color_transformer_sru = '#D9822B'  # More reddish orange for Transformer
+color_ours_sru = '#9467bd'         # Purple for Ours
+color_transformer_sru = '#2ca02c'  # Green for Transformer
 
 # Plot GT line
 line_gt = ax2.plot(time_steps_sru, gt_sru, color=color_gt_sru, linewidth=1.8,
@@ -125,7 +125,7 @@ ax2.set_xlim(0, 200)
 ax2.grid(True, alpha=0.3, linestyle='--', linewidth=0.5)
 ax2.tick_params(labelsize=11)
 
-# Custom legend with fill patches - positioned in center-left empty space
+# Custom legend with fill patches - positioned right to avoid overlapping curves
 legend_elements_sru = [
     Patch(facecolor=color_gt_sru, edgecolor=color_gt_sru, label='GT'),
     Patch(facecolor=color_ours_sru, edgecolor=color_ours_sru, label='Ours'),
@@ -133,7 +133,7 @@ legend_elements_sru = [
     Patch(facecolor=color_transformer_sru, edgecolor=color_transformer_sru, label='Transformer'),
     Patch(facecolor=color_transformer_sru, edgecolor=color_transformer_sru, alpha=0.3, label='Error(Transformer)')
 ]
-ax2.legend(handles=legend_elements_sru, loc='upper left', bbox_to_anchor=(0.05, 0.98),
+ax2.legend(handles=legend_elements_sru, loc='upper left', bbox_to_anchor=(0.32, 0.98),
           fontsize=10, framealpha=0.95, edgecolor='gray', fancybox=False)
 
 # ══════════════════════════════════════════════════════════════
