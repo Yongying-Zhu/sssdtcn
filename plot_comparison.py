@@ -82,7 +82,7 @@ ax1.set_xlim(0, 200)
 ax1.grid(True, alpha=0.3, linestyle='--', linewidth=0.5)
 ax1.tick_params(labelsize=11)
 
-# Custom legend with fill patches - positioned right to avoid overlapping curves
+# Custom legend with fill patches - strictly within red box bounds
 legend_elements_deb = [
     Patch(facecolor=color_gt_deb, edgecolor=color_gt_deb, label='GT'),
     Patch(facecolor=color_ours_deb, edgecolor=color_ours_deb, label='Ours'),
@@ -90,7 +90,7 @@ legend_elements_deb = [
     Patch(facecolor=color_transformer_deb, edgecolor=color_transformer_deb, label='Transformer'),
     Patch(facecolor=color_transformer_deb, edgecolor=color_transformer_deb, alpha=0.3, label='Error(Transformer)')
 ]
-ax1.legend(handles=legend_elements_deb, loc='upper left', bbox_to_anchor=(0.38, 0.98),
+ax1.legend(handles=legend_elements_deb, loc='center', bbox_to_anchor=(0.245, 0.785),
           fontsize=10, framealpha=0.95, edgecolor='gray', fancybox=False)
 
 # ══════════════════════════════════════════════════════════════
@@ -125,7 +125,7 @@ ax2.set_xlim(0, 200)
 ax2.grid(True, alpha=0.3, linestyle='--', linewidth=0.5)
 ax2.tick_params(labelsize=11)
 
-# Custom legend with fill patches - positioned right to avoid overlapping curves
+# Custom legend with fill patches - strictly within red box bounds
 legend_elements_sru = [
     Patch(facecolor=color_gt_sru, edgecolor=color_gt_sru, label='GT'),
     Patch(facecolor=color_ours_sru, edgecolor=color_ours_sru, label='Ours'),
@@ -133,7 +133,7 @@ legend_elements_sru = [
     Patch(facecolor=color_transformer_sru, edgecolor=color_transformer_sru, label='Transformer'),
     Patch(facecolor=color_transformer_sru, edgecolor=color_transformer_sru, alpha=0.3, label='Error(Transformer)')
 ]
-ax2.legend(handles=legend_elements_sru, loc='upper left', bbox_to_anchor=(0.32, 0.98),
+ax2.legend(handles=legend_elements_sru, loc='center', bbox_to_anchor=(0.195, 0.760),
           fontsize=10, framealpha=0.95, edgecolor='gray', fancybox=False)
 
 # ══════════════════════════════════════════════════════════════
