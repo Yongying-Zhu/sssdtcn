@@ -54,26 +54,26 @@ transformer_sru = gt_sru + np.random.randn(len(time_steps_sru)) * 0.04
 #  SUBPLOT 1: Debutanizer
 # ══════════════════════════════════════════════════════════════
 
-# Define colors (matching reference style)
-color_gt = '#2E2E2E'           # Dark gray/black for GT
-color_ours = '#1f77b4'         # Blue for Ours
-color_transformer = '#ff7f0e'  # Orange for Transformer
+# Define colors for Debutanizer (Dataset 1)
+color_gt_deb = '#2E2E2E'           # Dark gray/black for GT
+color_ours_deb = '#1f77b4'         # Blue for Ours
+color_transformer_deb = '#ff7f0e'  # Orange for Transformer
 
 # Plot GT line
-line_gt = ax1.plot(time_steps_deb, gt_deb, color=color_gt, linewidth=1.8,
+line_gt = ax1.plot(time_steps_deb, gt_deb, color=color_gt_deb, linewidth=1.8,
                    label='GT', alpha=0.9, zorder=3)
 
 # Plot Ours with error region
-line_ours = ax1.plot(time_steps_deb, ours_deb, color=color_ours, linewidth=1.5,
+line_ours = ax1.plot(time_steps_deb, ours_deb, color=color_ours_deb, linewidth=1.5,
                      label='Ours', alpha=0.9, zorder=2)
 fill_ours = ax1.fill_between(time_steps_deb, ours_deb, gt_deb,
-                              color=color_ours, alpha=0.25, zorder=1)
+                              color=color_ours_deb, alpha=0.25, zorder=1)
 
 # Plot Transformer with error region
-line_transformer = ax1.plot(time_steps_deb, transformer_deb, color=color_transformer,
+line_transformer = ax1.plot(time_steps_deb, transformer_deb, color=color_transformer_deb,
                             linewidth=1.5, label='Transformer', alpha=0.9, zorder=2)
 fill_transformer = ax1.fill_between(time_steps_deb, transformer_deb, gt_deb,
-                                     color=color_transformer, alpha=0.25, zorder=1)
+                                     color=color_transformer_deb, alpha=0.25, zorder=1)
 
 # Labels and formatting
 ax1.set_xlabel('Time step', fontsize=12)
@@ -82,40 +82,41 @@ ax1.set_xlim(0, 200)
 ax1.grid(True, alpha=0.3, linestyle='--', linewidth=0.5)
 ax1.tick_params(labelsize=11)
 
-# Custom legend with fill patches
-legend_elements = [
-    Patch(facecolor=color_gt, edgecolor=color_gt, label='GT'),
-    Patch(facecolor=color_ours, edgecolor=color_ours, label='Ours'),
-    Patch(facecolor=color_ours, edgecolor=color_ours, alpha=0.3, label='Error(Ours)'),
-    Patch(facecolor=color_transformer, edgecolor=color_transformer, label='Transformer'),
-    Patch(facecolor=color_transformer, edgecolor=color_transformer, alpha=0.3, label='Error(Transformer)')
+# Custom legend with fill patches - positioned in center-right empty space
+legend_elements_deb = [
+    Patch(facecolor=color_gt_deb, edgecolor=color_gt_deb, label='GT'),
+    Patch(facecolor=color_ours_deb, edgecolor=color_ours_deb, label='Ours'),
+    Patch(facecolor=color_ours_deb, edgecolor=color_ours_deb, alpha=0.3, label='Error(Ours)'),
+    Patch(facecolor=color_transformer_deb, edgecolor=color_transformer_deb, label='Transformer'),
+    Patch(facecolor=color_transformer_deb, edgecolor=color_transformer_deb, alpha=0.3, label='Error(Transformer)')
 ]
-ax1.legend(handles=legend_elements, loc='center left', fontsize=10,
-          framealpha=0.95, edgecolor='gray', fancybox=False)
-
-# Add "Ours" label in upper left corner
-ax1.text(0.015, 0.98, 'Ours', transform=ax1.transAxes,
-         fontsize=11, fontweight='normal', va='top', ha='left')
+ax1.legend(handles=legend_elements_deb, loc='upper left', bbox_to_anchor=(0.12, 0.98),
+          fontsize=10, framealpha=0.95, edgecolor='gray', fancybox=False)
 
 # ══════════════════════════════════════════════════════════════
 #  SUBPLOT 2: SRU
 # ══════════════════════════════════════════════════════════════
 
+# Define colors for SRU (Dataset 2) - slightly different shade
+color_gt_sru = '#2E2E2E'           # Dark gray/black for GT (same)
+color_ours_sru = '#0E5A8A'         # Darker/deeper blue for Ours
+color_transformer_sru = '#D9822B'  # More reddish orange for Transformer
+
 # Plot GT line
-line_gt = ax2.plot(time_steps_sru, gt_sru, color=color_gt, linewidth=1.8,
+line_gt = ax2.plot(time_steps_sru, gt_sru, color=color_gt_sru, linewidth=1.8,
                    label='GT', alpha=0.9, zorder=3)
 
 # Plot Ours with error region
-line_ours = ax2.plot(time_steps_sru, ours_sru, color=color_ours, linewidth=1.5,
+line_ours = ax2.plot(time_steps_sru, ours_sru, color=color_ours_sru, linewidth=1.5,
                      label='Ours', alpha=0.9, zorder=2)
 fill_ours = ax2.fill_between(time_steps_sru, ours_sru, gt_sru,
-                              color=color_ours, alpha=0.25, zorder=1)
+                              color=color_ours_sru, alpha=0.25, zorder=1)
 
 # Plot Transformer with error region
-line_transformer = ax2.plot(time_steps_sru, transformer_sru, color=color_transformer,
+line_transformer = ax2.plot(time_steps_sru, transformer_sru, color=color_transformer_sru,
                             linewidth=1.5, label='Transformer', alpha=0.9, zorder=2)
 fill_transformer = ax2.fill_between(time_steps_sru, transformer_sru, gt_sru,
-                                     color=color_transformer, alpha=0.25, zorder=1)
+                                     color=color_transformer_sru, alpha=0.25, zorder=1)
 
 # Labels and formatting
 ax2.set_xlabel('Time step', fontsize=12)
@@ -124,20 +125,16 @@ ax2.set_xlim(0, 200)
 ax2.grid(True, alpha=0.3, linestyle='--', linewidth=0.5)
 ax2.tick_params(labelsize=11)
 
-# Custom legend with fill patches
-legend_elements = [
-    Patch(facecolor=color_gt, edgecolor=color_gt, label='GT'),
-    Patch(facecolor=color_ours, edgecolor=color_ours, label='Ours'),
-    Patch(facecolor=color_ours, edgecolor=color_ours, alpha=0.3, label='Error(Ours)'),
-    Patch(facecolor=color_transformer, edgecolor=color_transformer, label='Transformer'),
-    Patch(facecolor=color_transformer, edgecolor=color_transformer, alpha=0.3, label='Error(Transformer)')
+# Custom legend with fill patches - positioned in center-left empty space
+legend_elements_sru = [
+    Patch(facecolor=color_gt_sru, edgecolor=color_gt_sru, label='GT'),
+    Patch(facecolor=color_ours_sru, edgecolor=color_ours_sru, label='Ours'),
+    Patch(facecolor=color_ours_sru, edgecolor=color_ours_sru, alpha=0.3, label='Error(Ours)'),
+    Patch(facecolor=color_transformer_sru, edgecolor=color_transformer_sru, label='Transformer'),
+    Patch(facecolor=color_transformer_sru, edgecolor=color_transformer_sru, alpha=0.3, label='Error(Transformer)')
 ]
-ax2.legend(handles=legend_elements, loc='center left', fontsize=10,
-          framealpha=0.95, edgecolor='gray', fancybox=False)
-
-# Add "Ours" label in upper left corner
-ax2.text(0.015, 0.98, 'Ours', transform=ax2.transAxes,
-         fontsize=11, fontweight='normal', va='top', ha='left')
+ax2.legend(handles=legend_elements_sru, loc='upper left', bbox_to_anchor=(0.05, 0.98),
+          fontsize=10, framealpha=0.95, edgecolor='gray', fancybox=False)
 
 # ══════════════════════════════════════════════════════════════
 #  SAVE FIGURE
