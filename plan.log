@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.3.15)  15 MAR 2026 16:07
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.3.15)  15 MAR 2026 16:17
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1122,25 +1122,12 @@ LaTeX Font Info:    External font `lmex10' loaded for size
  [2
 
 {/usr/share/texmf/fonts/enc/dvips/lm/lm-mathex.enc}]
-[3] [4
-
-] [5] [6
-
-]
-Overfull \hbox (26.0071pt too wide) in paragraph at lines 569--575
+[3] [4] [5]
+Overfull \hbox (54.39047pt too wide) in paragraph at lines 593--608
  [][] 
  []
 
-[7
-
-] [8]
-Overfull \hbox (54.39047pt too wide) in paragraph at lines 599--614
- [][] 
- []
-
-[9
-
-] (./plan.aux)
+[6] [7] (./plan.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
@@ -1149,13 +1136,13 @@ Package rerunfilecheck Info: File `plan.out' has not changed.
 (rerunfilecheck)             Checksum: 19E12510D2BEF2758E8881E2FD5E1C8B;1486.
  ) 
 Here is how much of TeX's memory you used:
- 37719 strings out of 476106
- 869742 string characters out of 5793933
+ 37717 strings out of 476106
+ 869747 string characters out of 5793933
  1943975 words of memory out of 5000000
  59078 multiletter control sequences out of 15000+600000
  632898 words of font info for 90 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
- 84i,15n,93p,1193b,2310s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 84i,15n,93p,1193b,2314s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texmf/fonts/type1/public/lm/lmbx10.pfb></usr/share/texmf/fonts/ty
 pe1/public/lm/lmbx12.pfb></usr/share/texmf/fonts/type1/public/lm/lmex10.pfb></u
 sr/share/texmf/fonts/type1/public/lm/lmmi10.pfb></usr/share/texmf/fonts/type1/p
@@ -1168,10 +1155,10 @@ e1/public/lm/lmri10.pfb></usr/share/texmf/fonts/type1/public/lm/lmri12.pfb></us
 r/share/texmf/fonts/type1/public/lm/lmsy10.pfb></usr/share/texmf/fonts/type1/pu
 blic/lm/lmsy6.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy8.pfb></usr/share
 /texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on plan.pdf (10 pages, 296421 bytes).
+Output written on plan.pdf (8 pages, 295053 bytes).
 PDF statistics:
- 245 PDF objects out of 1000 (max. 8388607)
- 174 compressed objects within 2 object streams
- 36 named destinations out of 1000 (max. 500000)
+ 237 PDF objects out of 1000 (max. 8388607)
+ 168 compressed objects within 2 object streams
+ 34 named destinations out of 1000 (max. 500000)
  149 words of extra memory for PDF output out of 10000 (max. 10000000)
 

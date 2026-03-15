@@ -137,7 +137,7 @@ context matters more, but the schedule is mask-blind; (3)~non-stationary
 operating regimes cannot be tracked by static rates.
 \Cref{fig:current} illustrates the current fixed-dilation stack.
 
-\begin{figure}[H]
+\begin{figure}[ht]
   \centering
   \begin{tikzpicture}[>=Stealth, font=\small,
       box/.style={draw, rounded corners=3pt, minimum width=1.6cm,
@@ -171,8 +171,6 @@ operating regimes cannot be tracked by static rates.
            layers with a fixed exponential dilation schedule.}
   \label{fig:current}
 \end{figure}
-
-\newpage
 
 %=============================================================================
 \section{Approach I: Learnable Soft Dilation Parameters}
@@ -214,7 +212,7 @@ where $\{u\}$ denotes the fractional part of $u$ and the diversity penalty
 \cref{eq:divreg} (weight $\beta>0$) prevents all layers collapsing to the same
 rate.
 
-\begin{figure}[H]
+\begin{figure}[ht]
   \centering
   \begin{tikzpicture}[>=Stealth, font=\small,
       box/.style={draw, rounded corners=3pt, fill=approachblue!15,
@@ -252,7 +250,6 @@ rate.
   \label{fig:approach1}
 \end{figure}
 
-\clearpage
 %=============================================================================
 \section{Approach II: Input-Conditioned Selective Kernel Dilation}
 %=============================================================================
@@ -299,12 +296,12 @@ every new input at inference time.
 The effective dilation is $d^{\mathrm{eff}} = \sum_j \alpha^{(j)} d^{(j)}$:
 different inputs yield different $\alpha^{(j)}$, shifting the effective rate.
 
-\begin{figure}[H]
+\begin{figure}[ht]
   \centering
   % Clean layout: branches stacked vertically; Squeeze box ABOVE; Combine box
   % BELOW.  All arrows either converge upward (→ Squeeze) or downward
   % (→ Combine), so no two arrows cross.
-  \begin{tikzpicture}[>=Stealth, font=\small,
+  \begin{tikzpicture}[>=Stealth, font=\small, scale=0.88, transform shape,
       ibox/.style={draw, rounded corners=4pt, minimum width=2.0cm,
                    minimum height=0.65cm, align=center},
       arr/.style={->, thick}
@@ -313,32 +310,32 @@ different inputs yield different $\alpha^{(j)}$, shifting the effective rate.
     \node[ibox, fill=approachblue!20] (h0) at (0, 0) {$\hv^{(\ell-1)}$};
 
     %-- K=4 branch nodes, vertically centred at x=4
-    \node[ibox, fill=approachblue!15] (b1) at (4,  1.65) {$d^{(1)}{=}1$};
-    \node[ibox, fill=approachblue!20] (b2) at (4,  0.55) {$d^{(2)}{=}2$};
-    \node[ibox, fill=approachblue!30] (b3) at (4, -0.55) {$d^{(3)}{=}4$};
-    \node[ibox, fill=approachblue!40] (b4) at (4, -1.65) {$d^{(4)}{=}8$};
+    \node[ibox, fill=approachblue!15] (b1) at (4,  1.35) {$d^{(1)}{=}1$};
+    \node[ibox, fill=approachblue!20] (b2) at (4,  0.45) {$d^{(2)}{=}2$};
+    \node[ibox, fill=approachblue!30] (b3) at (4, -0.45) {$d^{(3)}{=}4$};
+    \node[ibox, fill=approachblue!40] (b4) at (4, -1.35) {$d^{(4)}{=}8$};
 
-    %-- Squeeze block: well above all branches (no collision with branch labels)
-    \node[ibox, fill=accentorange!25, text width=3.6cm] (sq) at (8.5,  3.6)
-          {\small$\displaystyle\sum_j\tilde{\hv}^{(j)}$ $\to$ AvgPool $\to$ FC$\to$softmax};
+    %-- Squeeze block: above all branches (no collision with branch labels)
+    \node[ibox, fill=accentorange!25, text width=3.6cm] (sq) at (8.5,  2.8)
+          {$\sum_j\tilde{\hv}^{(j)}$ $\!\to\!$ AvgPool $\!\to\!$ FC $\!\to\!$ softmax};
 
-    %-- Combine block: well below all branches
-    \node[ibox, fill=accentorange!50, minimum width=3.0cm] (cb) at (8.5, -3.6)
+    %-- Combine block: below all branches
+    \node[ibox, fill=accentorange!50, minimum width=3.0cm] (cb) at (8.5, -2.8)
           {Weighted sum $\hv^{(\ell)}$};
 
     %-- Output
-    \node[ibox, fill=accentorange!30] (out) at (13, 0) {$\hv^{(\ell)}$};
+    \node[ibox, fill=accentorange!30] (out) at (12.5, 0) {$\hv^{(\ell)}$};
 
-    %-- h0 → branches (4 diverging arrows, no crossing)
+    %-- h0 → branches
     \foreach \b in {b1,b2,b3,b4}{ \draw[arr] (h0.east) -- (\b.west); }
 
-    %-- branches → Squeeze (all converge upward, no crossing)
+    %-- branches → Squeeze (all converge upward)
     \foreach \b in {b1,b2,b3,b4}{ \draw[arr] (\b.east) -- (sq.west); }
 
-    %-- branches → Combine (all converge downward, no crossing)
+    %-- branches → Combine (all converge downward)
     \foreach \b in {b1,b2,b3,b4}{ \draw[arr] (\b.east) -- (cb.west); }
 
-    %-- Squeeze → Combine (vertical arrow on the right, well clear of branches)
+    %-- Squeeze → Combine (vertical arrow, well clear of branches)
     \draw[arr, color=accentorange, very thick]
       (sq.south) -- node[right=3pt, font=\scriptsize]{$\alpha^{(j)}$} (cb.north);
 
@@ -355,7 +352,6 @@ different inputs yield different $\alpha^{(j)}$, shifting the effective rate.
   \label{fig:approach2}
 \end{figure}
 
-\clearpage
 %=============================================================================
 \section{Approach III: Frequency-Spectral Guided Adaptive Dilation}
 %=============================================================================
@@ -404,7 +400,7 @@ limitation (cannot track non-stationarity within the dataset).
        \label{eq:freqdil}
 \end{align}
 
-\begin{figure}[H]
+\begin{figure}[ht]
   \centering
   \begin{tikzpicture}[>=Stealth, font=\small]
 
@@ -468,7 +464,6 @@ limitation (cannot track non-stationarity within the dataset).
   \label{fig:approach3}
 \end{figure}
 
-\clearpage
 %=============================================================================
 \section{Approach IV: Temporal Self-Attention Guided Dynamic Dilation}
 %=============================================================================
@@ -521,22 +516,22 @@ approaches.
 where \cref{eq:dyngate} constrains the adapted dilation to
 $[0,\,2d_\ell^{(0)}]$.
 
-\begin{figure}[H]
+\begin{figure}[ht]
   \centering
-  \begin{tikzpicture}[>=Stealth, font=\small,
+  \begin{tikzpicture}[>=Stealth, font=\small, scale=0.88, transform shape,
       mbox/.style={draw, rounded corners=4pt, minimum width=2.4cm,
                    minimum height=0.75cm, align=center},
       arr/.style={->, thick}
     ]
     %-- Main-line nodes (y=0)
     \node[mbox, fill=approachblue!20]   (h0)   at (0,   0) {$\hv^{(\ell-1)}$};
-    \node[mbox, fill=accentorange!25]   (attn) at (6.0, 0) {Attention\\$a_{t,\delta}$, $\bar{d}_t$};
-    \node[mbox, fill=accentorange!50]   (gate) at (10.5,0) {Gate\\$\tilde{d}_{t,\ell}$};
-    \node[mbox, fill=approachblue!30]   (out)  at (14.5,0) {$\hv^{(\ell)}$};
+    \node[mbox, fill=accentorange!25]   (attn) at (5.5, 0) {Attention\\$a_{t,\delta}$, $\bar{d}_t$};
+    \node[mbox, fill=accentorange!50]   (gate) at (9.8, 0) {Gate\\$\tilde{d}_{t,\ell}$};
+    \node[mbox, fill=approachblue!30]   (out)  at (13.5,0) {$\hv^{(\ell)}$};
 
     %-- Projection nodes (above and below main line, clear of other boxes)
-    \node[mbox, fill=approachblue!10]   (q)    at (3.2,  2.0) {$\mathbf{q}_t{=}\mathbf{W}_Q\hv$};
-    \node[mbox, fill=approachblue!10]   (k)    at (3.2, -2.0) {$\mathbf{k}_t{=}\mathbf{W}_K\hv$};
+    \node[mbox, fill=approachblue!10]   (q)    at (3.0,  1.9) {$\mathbf{q}_t{=}\mathbf{W}_Q\hv$};
+    \node[mbox, fill=approachblue!10]   (k)    at (3.0, -1.9) {$\mathbf{k}_t{=}\mathbf{W}_K\hv$};
 
     %-- h0 → q (up-right)
     \draw[arr] (h0.north) to[out=80, in=170] (q.west);
@@ -576,7 +571,6 @@ $[0,\,2d_\ell^{(0)}]$.
   \label{fig:approach4}
 \end{figure}
 
-\clearpage
 %=============================================================================
 \section{Comparative Discussion}
 %=============================================================================
@@ -590,7 +584,7 @@ end-to-end refinement at minimal additional cost.
 
 \vspace{6pt}
 
-\begin{table}[H]
+\begin{table}[ht]
   \centering
   \caption{Comparison of adaptive dilation approaches.}
   \label{tab:comparison}

@@ -1,5 +1,5 @@
-\contentsline {section}{\numberline {1}Approach I: Learnable Soft Dilation Parameters}{3}{section.1}%
-\contentsline {section}{\numberline {2}Approach II: Input-Conditioned Selective Kernel Dilation}{4}{section.2}%
-\contentsline {section}{\numberline {3}Approach III: Frequency-Spectral Guided Adaptive Dilation}{6}{section.3}%
-\contentsline {section}{\numberline {4}Approach IV: Temporal Self-Attention Guided Dynamic Dilation}{7}{section.4}%
-\contentsline {section}{\numberline {5}Comparative Discussion}{9}{section.5}%
+\contentsline {section}{\numberline {1}Approach I: Learnable Soft Dilation Parameters}{2}{section.1}%
+\contentsline {section}{\numberline {2}Approach II: Input-Conditioned Selective Kernel Dilation}{3}{section.2}%
+\contentsline {section}{\numberline {3}Approach III: Frequency-Spectral Guided Adaptive Dilation}{4}{section.3}%
+\contentsline {section}{\numberline {4}Approach IV: Temporal Self-Attention Guided Dynamic Dilation}{5}{section.4}%
+\contentsline {section}{\numberline {5}Comparative Discussion}{6}{section.5}%
