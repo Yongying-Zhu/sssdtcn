@@ -1,4 +1,4 @@
-# SSSDTCN: State Space Structured Deep Temporal Convolution Network
+# An Implicit-Explicit Diffusion Model for Industrial Data Imputation
 
 <p align="center">
   <a href="#english">English</a> | <a href="#中文">中文</a>
@@ -11,10 +11,11 @@
 
 ### Overview
 
-**SSSDTCN (State Space Structured Deep Temporal Convolution Network)** is a novel deep learning framework for **time series imputation** in industrial process control systems. The model combines:
+This repository implements **an Implicit-Explicit Diffusion Model** for **time series imputation** in industrial process control systems. The model architecture is called **SSSDTCN**, which integrates:
 
-- 🔹 **Implicit Feature Extraction**: Multi-scale dilated causal convolutions capture temporal patterns at different scales
-- 🔹 **Explicit Feature Modeling**: S4 (Structured State Space Sequence) layers model long-range dependencies
+- 🔹 **Structured State Space Models (S4)**: Efficiently model long-range dependencies and temporal dynamics
+- 🔹 **Dilated Temporal Convolutions**: Multi-scale causal convolutions capture patterns at different time scales
+- 🔹 **Implicit-Explicit Fusion**: Combines implicit feature extraction (dilated convolutions) with explicit modeling (state space models)
 - 🔹 **Diffusion-based Imputation**: Probabilistic diffusion process for robust missing value estimation
 
 ### 🎯 Key Features
@@ -179,7 +180,7 @@ If you use this code in your research, please cite:
 
 ```bibtex
 @article{sssdtcn2024,
-  title={SSSDTCN: State Space Structured Deep Temporal Convolution Network for Time Series Imputation},
+  title={An Implicit-Explicit Diffusion Model for Industrial Data Imputation},
   author={Yongying Zhu},
   journal={arXiv preprint},
   year={2024}
@@ -206,10 +207,11 @@ This project is licensed under the MIT License.
 
 ### 概述
 
-**SSSDTCN（状态空间结构化深度时序卷积网络）**是一个用于工业过程控制系统中**时间序列插补**的新型深度学习框架。该模型结合了：
+本仓库实现了用于工业过程控制系统中**时间序列插补**的**隐式-显式扩散模型**。模型架构称为**SSSDTCN**，融合了：
 
-- 🔹 **隐式特征提取**：多尺度扩张因果卷积捕捉不同尺度的时序模式
-- 🔹 **显式特征建模**：S4（结构化状态空间序列）层建模长期依赖关系
+- 🔹 **结构化状态空间模型（S4）**：高效建模长期依赖关系和时序动态
+- 🔹 **扩张时序卷积**：多尺度因果卷积捕捉不同时间尺度的模式
+- 🔹 **隐式-显式融合**：结合隐式特征提取（扩张卷积）与显式建模（状态空间模型）
 - 🔹 **基于扩散的插补**：概率扩散过程用于鲁棒的缺失值估计
 
 ### 🎯 核心特性
@@ -316,7 +318,7 @@ python draw_debutanizer_periodicity.py
 
 ```bibtex
 @article{sssdtcn2024,
-  title={SSSDTCN: 状态空间结构化深度时序卷积网络用于时间序列插补},
+  title={An Implicit-Explicit Diffusion Model for Industrial Data Imputation},
   author={朱永英},
   journal={arXiv预印本},
   year={2024}
