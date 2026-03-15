@@ -1,41 +1,5 @@
-\contentsline {section}{\numberline {1}Introduction}{3}{section.1}%
-\contentsline {section}{\numberline {2}Background and Notation}{4}{section.2}%
-\contentsline {subsection}{\numberline {2.1}Dilated Causal Convolution}{4}{subsection.2.1}%
-\contentsline {subsection}{\numberline {2.2}Current SSSDTCN Implicit Module}{4}{subsection.2.2}%
-\contentsline {subsection}{\numberline {2.3}Terminology Summary}{4}{subsection.2.3}%
-\contentsline {section}{\numberline {3}Approach I: Learnable Soft Dilation Parameters}{4}{section.3}%
-\contentsline {subsection}{\numberline {3.1}Motivation}{5}{subsection.3.1}%
-\contentsline {subsection}{\numberline {3.2}Mathematical Formulation}{5}{subsection.3.2}%
-\contentsline {subsection}{\numberline {3.3}Diagram}{5}{subsection.3.3}%
-\contentsline {subsection}{\numberline {3.4}Advantages and Limitations}{5}{subsection.3.4}%
-\contentsline {section}{\numberline {4}Approach II: Input-Conditioned Selective Kernel Dilation}{6}{section.4}%
-\contentsline {subsection}{\numberline {4.1}Motivation}{6}{subsection.4.1}%
-\contentsline {subsection}{\numberline {4.2}Mathematical Formulation}{6}{subsection.4.2}%
-\contentsline {subsection}{\numberline {4.3}Diagram}{7}{subsection.4.3}%
-\contentsline {subsection}{\numberline {4.4}Advantages and Limitations}{7}{subsection.4.4}%
-\contentsline {section}{\numberline {5}Approach III: Differentiable Architecture Search for Dilation Rates}{7}{section.5}%
-\contentsline {subsection}{\numberline {5.1}Motivation}{8}{subsection.5.1}%
-\contentsline {subsection}{\numberline {5.2}Mathematical Formulation}{8}{subsection.5.2}%
-\contentsline {subsection}{\numberline {5.3}Search Space Design for SSSDTCN}{9}{subsection.5.3}%
-\contentsline {subsection}{\numberline {5.4}Diagram}{9}{subsection.5.4}%
-\contentsline {subsection}{\numberline {5.5}Advantages and Limitations}{10}{subsection.5.5}%
-\contentsline {section}{\numberline {6}Approach IV: Frequency-Spectral Guided Adaptive Dilation}{10}{section.6}%
-\contentsline {subsection}{\numberline {6.1}Motivation}{10}{subsection.6.1}%
-\contentsline {subsection}{\numberline {6.2}Mathematical Formulation}{10}{subsection.6.2}%
-\contentsline {subsection}{\numberline {6.3}Diagram}{11}{subsection.6.3}%
-\contentsline {subsection}{\numberline {6.4}Worked Example for the Debutanizer Dataset}{11}{subsection.6.4}%
-\contentsline {subsection}{\numberline {6.5}Advantages and Limitations}{12}{subsection.6.5}%
-\contentsline {section}{\numberline {7}Approach V: Temporal Self-Attention Guided Progressive Dilation}{12}{section.7}%
-\contentsline {subsection}{\numberline {7.1}Motivation}{12}{subsection.7.1}%
-\contentsline {subsection}{\numberline {7.2}Mathematical Formulation}{12}{subsection.7.2}%
-\contentsline {subsection}{\numberline {7.3}Diagram}{13}{subsection.7.3}%
-\contentsline {subsection}{\numberline {7.4}Advantages and Limitations}{13}{subsection.7.4}%
-\contentsline {section}{\numberline {8}Comparative Analysis}{14}{section.8}%
-\contentsline {subsection}{\numberline {8.1}Quantitative Comparison Table}{14}{subsection.8.1}%
-\contentsline {subsection}{\numberline {8.2}Receptive Field Coverage}{14}{subsection.8.2}%
-\contentsline {subsection}{\numberline {8.3}Recommended Strategy for SSSDTCN}{14}{subsection.8.3}%
-\contentsline {section}{\numberline {9}Implementation Notes}{15}{section.9}%
-\contentsline {subsection}{\numberline {9.1}Integration with Existing Codebase}{15}{subsection.9.1}%
-\contentsline {subsection}{\numberline {9.2}Approach I Implementation Sketch}{15}{subsection.9.2}%
-\contentsline {subsection}{\numberline {9.3}Approach IV Implementation Sketch}{16}{subsection.9.3}%
-\contentsline {section}{\numberline {10}Conclusion}{16}{section.10}%
+\contentsline {section}{\numberline {1}Approach I: Learnable Soft Dilation Parameters}{3}{section.1}%
+\contentsline {section}{\numberline {2}Approach II: Input-Conditioned Selective Kernel Dilation}{4}{section.2}%
+\contentsline {section}{\numberline {3}Approach III: Frequency-Spectral Guided Adaptive Dilation}{6}{section.3}%
+\contentsline {section}{\numberline {4}Approach IV: Temporal Self-Attention Guided Dynamic Dilation}{7}{section.4}%
+\contentsline {section}{\numberline {5}Comparative Discussion}{9}{section.5}%
