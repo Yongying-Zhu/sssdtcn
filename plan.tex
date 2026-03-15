@@ -19,16 +19,14 @@
 \usepackage{multirow}
 \usepackage{array}
 \usepackage{xcolor}
-\usepackage{float}        % [H] placement
-\usepackage{placeins}     % \FloatBarrier
-\usepackage{natbib}
+\usepackage{float}
+\usepackage{placeins}
 \usepackage{hyperref}
 \usepackage{cleveref}
 \usepackage{parskip}
 \usepackage{titlesec}
 \usepackage{fancyhdr}
 \usepackage{caption}
-\usepackage{titletoc}     % TOC customisation
 
 %--- Colors ---
 \definecolor{primaryblue}{RGB}{31,78,121}
@@ -37,7 +35,6 @@
 \definecolor{darkgray}{RGB}{64,64,64}
 \definecolor{mathgreen}{RGB}{0,128,0}
 \definecolor{approachblue}{RGB}{0,70,127}
-\definecolor{approachpurple}{RGB}{112,48,160}
 \definecolor{approachteal}{RGB}{0,112,112}
 \definecolor{approachorange}{RGB}{180,90,0}
 
@@ -63,7 +60,6 @@
 \newcommand{\hv}{\mathbf{h}}
 \newcommand{\wv}{\mathbf{w}}
 \newcommand{\alphav}{\boldsymbol{\alpha}}
-\newcommand{\thetav}{\boldsymbol{\theta}}
 
 %=============================================================================
 \begin{document}
@@ -99,14 +95,12 @@
       design achieves broad multi-scale temporal coverage, it cannot adapt to the
       specific periodicity or correlation structure of different industrial
       datasets or input segments. This document surveys and formalises
-      \textbf{five principled approaches} for making the dilation factors
-      \emph{adaptive}: (I) learnable soft dilation parameters, (II)
-      input-conditioned selective kernel fusion (SKNet-inspired), (III)
-      differentiable neural architecture search (DARTS-based), (IV)
-      frequency-spectral guided dilation, and (V) temporal self-attention guided
-      dynamic dilation. For each approach the core adaptive mechanism, its
-      source literature, and the essential mathematical formulation are presented
-      together with an illustrative diagram.
+      \textbf{four principled approaches} for making the dilation factors
+      \emph{adaptive}: (I)~learnable soft dilation parameters, (II)~input-conditioned
+      selective kernel fusion (SKNet-inspired), (III)~frequency-spectral guided
+      dilation, and (IV)~temporal self-attention guided dynamic dilation. For each
+      approach the source literature, core adaptive mechanism, and essential
+      mathematical formulation are presented together with an illustrative diagram.
     \end{minipage}
 
     \vspace{1.5cm}
@@ -116,15 +110,14 @@
   \end{center}
 \end{titlepage}
 
-%--- TOC: show only numbered sections (approaches + comparison) ---
+%--- TOC ---
 \setcounter{tocdepth}{1}
 \tableofcontents
-\newpage
+\clearpage
 
 %=============================================================================
-% Unnumbered context section -- NOT in TOC
-%=============================================================================
 \section*{Background}
+%=============================================================================
 \vspace{-6pt}
 
 The implicit module of SSSDTCN stacks $L$ dilated causal convolution layers.
@@ -185,18 +178,23 @@ operating regimes cannot be tracked by static rates.
 \section{Approach I: Learnable Soft Dilation Parameters}
 %=============================================================================
 
-Inspired by \textbf{Deformable Convolutional Networks}~\citep{dai2017deformable},
-which showed that sampling offsets in convolutional kernels can be learned from
-data rather than fixed on a regular grid, this approach extends the same
-principle to the temporal dilation axis. Each layer $\ell$ is assigned an
-unconstrained trainable scalar $\lambda_\ell \in \mathbb{R}$; the effective
-dilation factor is $d_\ell = \exp(\lambda_\ell)$, which is always positive and
-differentiable. For non-integer $d_\ell$, the convolution uses linear
-interpolation between adjacent time steps, so the gradient flows back to
-$\lambda_\ell$ via the chain rule. The key to adaptivity is that
-$\{\lambda_\ell\}$ are jointly optimised with all other model weights during
-end-to-end training, so the dilation schedule converges to the values that best
-explain the training data---rather than the values a human engineer pre-selected.
+\noindent\textit{Reference: Dai et al.\ (2017), Deformable Convolutional
+Networks, ICCV; Chen et al.\ (2020), Temporal Deformable Convolution.}
+
+\medskip
+
+Inspired by deformable convolutions, which showed that spatial sampling
+offsets can be learned from data rather than fixed on a regular grid, this
+approach applies the same principle to the temporal dilation axis. Each layer
+$\ell$ is assigned an unconstrained trainable scalar $\lambda_\ell \in
+\mathbb{R}$; the effective dilation is $d_\ell = e^{\lambda_\ell}$, which is
+always positive and differentiable. For non-integer $d_\ell$, linear
+interpolation between adjacent time steps enables gradient flow back to
+$\lambda_\ell$. Because $\{\lambda_\ell\}$ are optimised jointly with all
+other model weights during end-to-end training, the dilation schedule converges
+to the values that best fit the training data rather than to a human-specified
+schedule. Once training ends the dilations are fixed; all inputs share the same
+learned rates.
 
 \medskip
 
@@ -205,46 +203,52 @@ explain the training data---rather than the values a human engineer pre-selected
   d_\ell &= \exp(\lambda_\ell), \label{eq:softd}\\
   (\xv \star_{d_\ell} \wv)[t]
     &= \sum_{i=0}^{k-1} \wv[i]\cdot
-       \underbrace{(1-\{d_\ell i\})\,\xv[\lfloor t-d_\ell i\rfloor]
-                  +\{d_\ell i\}\,\xv[\lceil t-d_\ell i\rceil]}_{
-                  \text{linear interpolation}}, \label{eq:softconv}\\
+       \underbrace{(1{-}\{d_\ell i\})\,\xv[\lfloor t-d_\ell i\rfloor]
+                  +\{d_\ell i\}\,\xv[\lceil t-d_\ell i\rceil]}_{\text{linear
+                  interpolation}}, \label{eq:softconv}\\
   \mathcal{L} &= \mathcal{L}_{\text{impute}}
                - \beta\!\sum_{\ell<\ell'}\!|d_\ell - d_{\ell'}|,
                \label{eq:divreg}
 \end{align}
-where $\{u\}$ is the fractional part of $u$ and the diversity term
-\cref{eq:divreg} (weight $\beta>0$) prevents all layers from collapsing to the
-same dilation value.
+where $\{u\}$ denotes the fractional part of $u$ and the diversity penalty
+\cref{eq:divreg} (weight $\beta>0$) prevents all layers collapsing to the same
+rate.
 
 \begin{figure}[H]
   \centering
   \begin{tikzpicture}[>=Stealth, font=\small,
       box/.style={draw, rounded corners=3pt, fill=approachblue!15,
-                  minimum width=2.0cm, minimum height=0.65cm, align=center},
-      param/.style={draw, circle, fill=accentorange!40, minimum size=0.9cm,
-                    font=\small},
+                  minimum width=2.2cm, minimum height=0.7cm, align=center},
+      param/.style={draw, circle, fill=accentorange!50, minimum size=1.0cm},
       arr/.style={->, thick}
     ]
-    \node[box] (h0) {$\hv^{(\ell-1)}$};
-    \node[param, right=1.4cm of h0] (lam) {$\lambda_\ell$};
-    \node[box, right=1.1cm of lam] (exp) {$d_\ell{=}e^{\lambda_\ell}$};
-    \node[box, right=1.1cm of exp] (conv) {Interp.\ Conv};
-    \node[box, right=1.1cm of conv] (out) {$\hv^{(\ell)}$};
+    % Main flow nodes spaced well apart
+    \node[box] (h0) at (0, 0) {$\hv^{(\ell-1)}$};
+    \node[param]    (lam) at (2.6, 0) {$\lambda_\ell$};
+    \node[box]      (exp) at (5.2, 0) {$d_\ell{=}e^{\lambda_\ell}$};
+    \node[box]      (conv) at (8.2, 0) {Interp.\ Conv};
+    \node[box]      (out)  at (11.2, 0) {$\hv^{(\ell)}$};
 
-    \draw[arr] (h0) -- (lam);
+    % Main horizontal flow
+    \draw[arr] (h0)  -- (lam);
     \draw[arr] (lam) -- (exp);
     \draw[arr] (exp) -- node[above, font=\scriptsize]{dilation} (conv);
     \draw[arr] (conv) -- (out);
-    \draw[arr] (h0.north) to[out=60, in=120]
-               node[above, font=\scriptsize]{residual} (out.north);
-    \draw[->, dashed, color=mathgreen, thick]
-      (out.south) to[out=-80, in=-80]
-      node[below, font=\scriptsize\color{mathgreen}]{$\nabla_{\lambda_\ell}\mathcal{L}$}
+
+    % Residual arc: clear of all boxes by going high above
+    \draw[arr] (h0.north) to[out=75, in=105, looseness=0.55]
+               node[above=4pt, font=\scriptsize]{residual} (out.north);
+
+    % Gradient arc: below all boxes, well clear of them
+    \draw[->, dashed, thick, color=mathgreen]
+      (out.south) to[out=-75, in=-105, looseness=0.55]
+      node[below=4pt, font=\scriptsize, color=mathgreen]
+        {$\nabla_{\!\lambda_\ell}\mathcal{L}$\; (back-prop)}
       (lam.south);
   \end{tikzpicture}
-  \caption{Approach~I: the dilation $d_\ell=e^{\lambda_\ell}$ is a trainable
-           scalar. Gradients (green dashed) flow through the interpolated
-           convolution and update $\lambda_\ell$ end-to-end.}
+  \caption{Approach~I: $d_\ell = e^{\lambda_\ell}$ is a trainable scalar. The
+           interpolated convolution passes gradients (green dashed arc) back to
+           $\lambda_\ell$, optimising the dilation end-to-end.}
   \label{fig:approach1}
 \end{figure}
 
@@ -253,312 +257,323 @@ same dilation value.
 \section{Approach II: Input-Conditioned Selective Kernel Dilation}
 %=============================================================================
 
-This approach adapts the idea of \textbf{Selective Kernel Networks
-(SKNet)}~\citep{li2019selective} and \textbf{Squeeze-and-Excitation Networks
-(SENet)}~\citep{hu2018squeeze} to the temporal dilation setting. SKNet showed
-that, for a given input, a network can dynamically choose which kernel size to
-emphasise by routing features through a lightweight attention module. Here, $K$
-parallel dilated convolutions with distinct fixed candidate rates
-$D=\{d^{(1)},\ldots,d^{(K)}\}$ are applied to the same input simultaneously.
-Their outputs are aggregated, globally average-pooled into a compact descriptor,
-and passed through two fully-connected layers to produce per-channel soft
-selection weights $\alpha^{(j)} \in [0,1]^H$ for each branch. The final output
-is the weighted sum of all branch outputs. Adaptivity arises because the
-selection weights are \emph{conditioned on the current input}: different input
-segments or samples yield different $\alpha^{(j)}$, so the effective dilation
-shifts automatically to match the dominant temporal scale of each input.
+\noindent\textit{Reference: Li et al.\ (2019), Selective Kernel Networks
+(SKNet), CVPR; Hu et al.\ (2018), Squeeze-and-Excitation Networks (SENet),
+CVPR.}
+
+\medskip
+
+Approach~I's dilation rates are fixed after training and apply equally to every
+input. Approach~II starts from a different premise: different inputs intrinsically
+require different dilation rates, so the rates should be determined by the current
+input rather than fixed in advance. The implementation proceeds as follows.
+$K$~parallel dilated convolution branches with distinct candidate rates
+$\{d^{(1)},\ldots,d^{(K)}\}$ are applied simultaneously to the same input,
+producing $K$ feature maps. These are summed and globally average-pooled along
+the time axis, compressing the entire sequence into a fixed-length vector that
+captures the overall character of the current input. This vector is fed through
+two fully-connected layers to produce $K$ selection weights (summing to~1, one
+per branch). Finally, the $K$ feature maps are recombined as a weighted sum
+using those weights, yielding the layer output. Adaptivity arises because the
+weight vector is recomputed from scratch on every forward pass: a different
+input yields different weights, which in turn shifts the effective dilation
+toward the branch that best matches the dominant temporal scale of that input.
+This is the essential difference from Approach~I---whereas Approach~I's dilations
+are fixed at the end of training, Approach~II's effective dilation changes with
+every new input at inference time.
 
 \medskip
 
 \noindent\textbf{Core equations.}
 \begin{align}
-  \tilde{\hv}^{(j)} &= \mathrm{BN}\!\left(\mathrm{Conv}_{d^{(j)}}(\hv^{(\ell-1)})\right),
+  \tilde{\hv}^{(j)} &= \mathrm{Conv}_{d^{(j)}}\!\bigl(\hv^{(\ell-1)}\bigr),
     \quad j=1,\ldots,K, \label{eq:sk_split}\\
-  \mathbf{s} &= \mathrm{AvgPool}\!\left(\textstyle\sum_j \tilde{\hv}^{(j)}\right)\in\mathbb{R}^H,
-    \label{eq:sk_squeeze}\\
-  \boldsymbol{\alpha}^{(j)} &= \operatorname{softmax}_j\!\left(\mathbf{W}_2^{(j)}
-    \mathrm{ReLU}(\mathbf{W}_1 \mathbf{s})\right) \in [0,1]^H,
+  \mathbf{s} &= \mathrm{AvgPool}\!\Bigl(\textstyle\sum_{j=1}^{K}
+    \tilde{\hv}^{(j)}\Bigr)\in\mathbb{R}^{H}, \label{eq:sk_squeeze}\\
+  \alpha^{(j)} &= \operatorname{softmax}_{j}\!\bigl(\mathbf{W}_2^{(j)}
+    \operatorname{ReLU}(\mathbf{W}_1\,\mathbf{s})\bigr),
     \label{eq:sk_attn}\\
-  \hv^{(\ell)} &= \sum_{j=1}^{K} \boldsymbol{\alpha}^{(j)} \odot \tilde{\hv}^{(j)}.
+  \hv^{(\ell)} &= \sum_{j=1}^{K} \alpha^{(j)}\,\tilde{\hv}^{(j)}.
     \label{eq:sk_out}
 \end{align}
-The input-level effective dilation at time $t$ is interpretable as
-$d_\ell^{\text{eff}}(t)=\sum_j \bar{\alpha}^{(j)}(t)\cdot d^{(j)}$, where
-$\bar{\alpha}^{(j)}(t)$ is the channel-mean weight.
+The effective dilation is $d^{\mathrm{eff}} = \sum_j \alpha^{(j)} d^{(j)}$:
+different inputs yield different $\alpha^{(j)}$, shifting the effective rate.
 
 \begin{figure}[H]
   \centering
+  % Clean layout: branches stacked vertically; Squeeze box ABOVE; Combine box
+  % BELOW.  All arrows either converge upward (→ Squeeze) or downward
+  % (→ Combine), so no two arrows cross.
   \begin{tikzpicture}[>=Stealth, font=\small,
-      box/.style={draw, rounded corners=3pt, minimum width=2.0cm,
-                  minimum height=0.60cm, align=center},
+      ibox/.style={draw, rounded corners=4pt, minimum width=2.0cm,
+                   minimum height=0.65cm, align=center},
       arr/.style={->, thick}
     ]
-    \node[box, fill=approachblue!15] (h) {$\hv^{(\ell-1)}$};
+    %-- Input node
+    \node[ibox, fill=approachblue!20] (h0) at (0, 0) {$\hv^{(\ell-1)}$};
 
-    \node[box, fill=approachblue!10, right=1.5cm of h, yshift= 1.5cm] (b1)
-          {$d^{(1)}{=}1$};
-    \node[box, fill=approachblue!20, right=1.5cm of h, yshift= 0.5cm] (b2)
-          {$d^{(2)}{=}2$};
-    \node[box, fill=approachblue!30, right=1.5cm of h, yshift=-0.5cm] (b3)
-          {$d^{(3)}{=}4$};
-    \node[box, fill=approachblue!40, right=1.5cm of h, yshift=-1.5cm] (b4)
-          {$d^{(4)}{=}8$};
+    %-- K=4 branch nodes, vertically centred at x=4
+    \node[ibox, fill=approachblue!15] (b1) at (4,  1.65) {$d^{(1)}{=}1$};
+    \node[ibox, fill=approachblue!20] (b2) at (4,  0.55) {$d^{(2)}{=}2$};
+    \node[ibox, fill=approachblue!30] (b3) at (4, -0.55) {$d^{(3)}{=}4$};
+    \node[ibox, fill=approachblue!40] (b4) at (4, -1.65) {$d^{(4)}{=}8$};
 
-    \foreach \b in {b1,b2,b3,b4}{ \draw[arr] (h) -- (\b.west); }
+    %-- Squeeze block: well above all branches (no collision with branch labels)
+    \node[ibox, fill=accentorange!25, text width=3.6cm] (sq) at (8.5,  3.6)
+          {\small$\displaystyle\sum_j\tilde{\hv}^{(j)}$ $\to$ AvgPool $\to$ FC$\to$softmax};
 
-    \node[box, fill=accentorange!20, right=1.2cm of b2, yshift=-0.5cm] (agg)
-          {Agg.\ $\rightarrow$\\GAP $\rightarrow$\\FC attn};
-    \foreach \b in {b1,b2,b3,b4}{ \draw[arr] (\b.east) -- (agg.west); }
+    %-- Combine block: well below all branches
+    \node[ibox, fill=accentorange!50, minimum width=3.0cm] (cb) at (8.5, -3.6)
+          {Weighted sum $\hv^{(\ell)}$};
 
-    \node[box, fill=accentorange!40, right=1.2cm of agg] (out)
-          {$\hv^{(\ell)}$};
-    \draw[arr] (agg) -- node[above, font=\scriptsize]{$\boldsymbol{\alpha}^{(j)}$} (out);
-    \foreach \b in {b1,b4}{
-      \draw[arr] (\b.east) to[out=0, in=130] (out.north west);
-    }
+    %-- Output
+    \node[ibox, fill=accentorange!30] (out) at (13, 0) {$\hv^{(\ell)}$};
+
+    %-- h0 → branches (4 diverging arrows, no crossing)
+    \foreach \b in {b1,b2,b3,b4}{ \draw[arr] (h0.east) -- (\b.west); }
+
+    %-- branches → Squeeze (all converge upward, no crossing)
+    \foreach \b in {b1,b2,b3,b4}{ \draw[arr] (\b.east) -- (sq.west); }
+
+    %-- branches → Combine (all converge downward, no crossing)
+    \foreach \b in {b1,b2,b3,b4}{ \draw[arr] (\b.east) -- (cb.west); }
+
+    %-- Squeeze → Combine (vertical arrow on the right, well clear of branches)
+    \draw[arr, color=accentorange, very thick]
+      (sq.south) -- node[right=3pt, font=\scriptsize]{$\alpha^{(j)}$} (cb.north);
+
+    %-- Combine → Output
+    \draw[arr] (cb.east) -- (out.south west);
+
   \end{tikzpicture}
-  \caption{Approach~II: four parallel branches with different dilation rates.
-           The squeeze-and-excitation block produces input-conditioned per-channel
-           attention weights that recombine the branch outputs.}
+  \caption{Approach~II: $K$ parallel branches produce $K$ feature maps (middle
+           column). The \emph{upper path} aggregates and compresses them to
+           compute per-branch weights $\alpha^{(j)}$ (orange arrow). The
+           \emph{lower path} recombines the branch features using those weights.
+           Because the Squeeze block sits above and the Combine block below all
+           branch nodes, no arrows cross.}
   \label{fig:approach2}
 \end{figure}
 
 \clearpage
 %=============================================================================
-\section{Approach III: Differentiable Architecture Search for Dilation Rates}
+\section{Approach III: Frequency-Spectral Guided Adaptive Dilation}
 %=============================================================================
 
-\textbf{DARTS (Differentiable ARchiTecture Search)}~\citep{liu2019darts}
-introduced continuous relaxation of discrete architecture choices via a
-\emph{mixed operation}: instead of committing to one operation, a weighted
-mixture of all candidate operations is used during search, with mixture weights
-jointly optimised via gradient descent. Translated to the dilation setting,
-each layer $\ell$ maintains a real-valued architecture parameter vector
-$\boldsymbol{\alpha}_\ell \in \mathbb{R}^K$ over $K$ candidate dilations. During
-the search phase, the layer computes a softmax-weighted mixture of all $K$
-dilated convolutions; after search, the candidate with the highest weight is
-selected and the final model is retrained from scratch with those discrete rates.
-Adaptivity is dataset-level: the architecture search explores a rich dilation
-space $D=\{1,2,3,4,6,8,12,16,24,32\}$ and converges to the schedule that
-minimises validation loss---no human choice required.
+\noindent\textit{Reference: Wu et al.\ (2023), TimesNet, ICLR; Zhou et al.\
+(2022), FEDformer, ICML.}
+
+\medskip
+
+The first two approaches rely on the training process to determine dilation
+rates. Approach~III involves no training at all: it reads the appropriate dilation
+rates directly from the statistical properties of the data \emph{before training
+begins}. Industrial time series typically contain several dominant periodic
+components. The core assumption is that a convolution kernel samples most
+efficiently when its stride equals one of those periods; under this assumption,
+the optimal dilation for layer~$\ell$ is the one that makes the kernel's total
+sampling span equal to the $\ell$-th dominant period. The procedure runs in
+three steps. First, the Fourier transform is applied to all channels of the
+training set and the magnitude spectra are averaged across channels, producing
+a single spectrum that reflects the dataset's overall frequency structure.
+Second, the $L$ largest peaks are identified, and each peak frequency is
+converted to a period length by dividing the sequence length by the frequency
+index. Third, for each period the required dilation is back-calculated from the
+target that the kernel's sampling span equals the period: $d_\ell = \lfloor
+P_\ell / (k-1)\rfloor$. These three steps execute once before training, and
+the resulting dilation schedule is installed as fixed layer configuration. No
+new parameters are introduced and no gradient updates are needed. The
+adaptivity is \emph{dataset-level}: running the procedure on a different
+dataset yields a different schedule, but within one dataset the rates are fixed
+once computed. This is both the strength (zero training cost) and the
+limitation (cannot track non-stationarity within the dataset).
 
 \medskip
 
 \noindent\textbf{Core equations.}
 \begin{align}
-  \bar{o}^{(\ell)}(\hv) &= \sum_{j=1}^{K}
-    \frac{\exp(\alpha_\ell^{(j)})}{\sum_{j'}\exp(\alpha_\ell^{(j')})}
-    \cdot\mathrm{Conv}_{d^{(j)}}(\hv), \label{eq:darts_mix}\\
-  \thetav &\leftarrow \thetav - \eta_\theta
-    \nabla_{\thetav}\mathcal{L}_{\text{train}}(\thetav,\alphav), \label{eq:darts_w}\\
-  \alphav &\leftarrow \alphav - \eta_\alpha
-    \nabla_{\alphav}\mathcal{L}_{\text{val}}(\thetav,\alphav), \label{eq:darts_a}\\
-  d_\ell^* &= d^{(\hat{j}_\ell)}, \quad
-    \hat{j}_\ell = \arg\max_j\,\alpha_\ell^{(j)}. \label{eq:darts_disc}
+  A_f
+    &= \frac{1}{C}\sum_{c=1}^{C}\bigl|\FFT(\xv[c,:])[f]\bigr|,
+       \quad f = 1,\ldots,\lfloor T/2\rfloor, \label{eq:fft}\\
+  f_1,\ldots,f_L
+    &= \TopK\!\left(\{A_f\},\,L\right), \label{eq:topk}\\
+  P_\ell
+    &= \left\lfloor T/f_\ell \right\rceil, \label{eq:period}\\
+  d_\ell
+    &= \max\!\left(1,\;\left\lfloor P_\ell/(k-1)\right\rfloor\right).
+       \label{eq:freqdil}
 \end{align}
-Equations~\cref{eq:darts_w,eq:darts_a} are the alternating gradient steps of
-the bi-level optimisation; \cref{eq:darts_disc} is the final discretisation.
 
 \begin{figure}[H]
   \centering
-  \begin{tikzpicture}[>=Stealth, font=\small,
-      snode/.style={draw, circle, fill=approachpurple!20, minimum size=1.0cm},
-      ebox/.style={draw, rounded corners=3pt, fill=approachpurple!15,
-                   minimum width=3.2cm, minimum height=0.65cm, align=center},
+  \begin{tikzpicture}[>=Stealth, font=\small]
+
+    %-- Step 1: pipeline boxes along the top row
+    \tikzset{
+      pbox/.style={draw, rounded corners=4pt, minimum width=2.1cm,
+                   minimum height=0.75cm, align=center, fill=approachteal!20},
       arr/.style={->, thick}
-    ]
-    \node[snode] (n0) at (0,0) {$\hv^{(\ell-1)}$};
+    }
+    \node[pbox]                        (inp)  at (0,   0) {Training\\data $\xv$};
+    \node[pbox, fill=approachteal!30]  (fft)  at (3.2, 0) {FFT\\per channel};
+    \node[pbox, fill=approachteal!40]  (avg)  at (6.2, 0) {Average\\spectrum $A_f$};
+    \node[pbox, fill=approachteal!55]  (topk) at (9.2, 0) {Top-$L$\\peaks $f_\ell$};
+    \node[pbox, fill=accentorange!50]  (dil)  at (12.2,0) {Dilations\\$d_\ell$};
 
-    \node[ebox, minimum height=1.6cm, right=1.6cm of n0] (mix)
-      {$\sum_j \pi_\ell^{(j)}\,\mathrm{Conv}_{d^{(j)}}$\\[4pt]
-       \scriptsize $d^{(j)}\in\{1,2,3,4,6,8,12,16,24,32\}$};
+    \draw[arr] (inp)  -- (fft);
+    \draw[arr] (fft)  -- (avg);
+    \draw[arr] (avg)  -- (topk);
+    \draw[arr] (topk) -- node[above, font=\scriptsize]
+                           {$P_\ell{=}\lfloor T/f_\ell\rceil$} (dil);
 
-    \node[snode, right=1.6cm of mix] (n1) {$\hv^{(\ell)}$};
+    %-- Step 2: spectrum sketch below the pipeline (shifted well down)
+    \begin{scope}[shift={(3.5, -3.0)}]
+      \begin{axis}[
+          width=6.5cm, height=3.2cm,
+          xtick=\empty, ytick=\empty,
+          axis lines=left,
+          xlabel={frequency $f$},
+          ylabel={$A_f$},
+          x label style={font=\small,
+            at={(axis description cs:0.5,-0.15)}, anchor=north},
+          y label style={font=\small,
+            at={(axis description cs:-0.12,0.5)}, anchor=south},
+          ymin=0, ymax=1.05,
+          clip=false,
+        ]
+        \addplot[fill=approachteal!30, draw=approachteal!80,
+                 ybar, bar width=3pt,
+                 samples at={1,2,...,18}]
+          { 0.05 + 0.82*exp(-0.45*(x-4)^2)
+                 + 0.52*exp(-0.40*(x-9)^2)
+                 + 0.32*exp(-0.55*(x-14)^2) };
+        \addplot[mark=triangle*, mark size=4pt,
+                 color=accentorange, only marks,
+                 mark options={fill=accentorange}]
+          coordinates{(4,0.87) (9,0.57) (14,0.37)};
+      \end{axis}
+      % Caption text placed BELOW the axis, well outside it
+      \node[font=\small\itshape, anchor=north] at (3.25, -0.55)
+        {Orange triangles: dominant peaks
+         $\;\to\;$ periods $P_\ell$
+         $\;\to\;$ dilations $d_\ell$};
+    \end{scope}
 
-    \draw[arr] (n0) -- (mix);
-    \draw[arr] (mix) -- (n1);
-
-    \node[ebox, fill=approachpurple!30, above=1.0cm of mix] (alpha)
-          {$\boldsymbol{\alpha}_\ell\in\mathbb{R}^{10}$};
-    \draw[->, dashed, thick, color=approachpurple] (alpha.south) -- (mix.north);
-
-    \draw[->, dotted, thick, color=mathgreen, bend right=25]
-      (n1.north) to node[above, font=\scriptsize\color{mathgreen}]
-      {$\nabla_{\alphav}\mathcal{L}_{\text{val}}$} (alpha.east);
-    \draw[->, dotted, thick, color=approachblue, bend left=25]
-      (n1.south) to node[below, font=\scriptsize\color{approachblue}]
-      {$\nabla_{\thetav}\mathcal{L}_{\text{train}}$} (n0.south);
-
-    \node[ebox, fill=accentorange!30, right=1.0cm of n1] (disc)
-          {Discretise\\$d^*{=}d^{(\hat{j})}$};
-    \draw[->, thick] (n1) -- (disc)
-      node[midway, above, font=\scriptsize]{post-search};
   \end{tikzpicture}
-  \caption{Approach~III: DARTS mixed operation. During search all candidate
-           dilations are active (weighted by $\pi_\ell^{(j)}$). After search
-           the best-scoring dilation is selected (orange box).}
+  \caption{Approach~III: the four-step offline calibration pipeline (top row).
+           The average FFT magnitude spectrum (bottom) is computed once from the
+           training set; the $L$ tallest peaks (orange triangles) determine
+           dominant periods, which are converted to dilation rates via
+           \cref{eq:freqdil}.}
   \label{fig:approach3}
 \end{figure}
 
 \clearpage
 %=============================================================================
-\section{Approach IV: Frequency-Spectral Guided Adaptive Dilation}
+\section{Approach IV: Temporal Self-Attention Guided Dynamic Dilation}
 %=============================================================================
 
-\textbf{TimesNet}~\citep{wu2023timesnet} and
-\textbf{FEDformer}~\citep{zhou2022fedformer} demonstrated that industrial and
-meteorological time series carry strong periodicity, and that aligning model
-structure with dominant periods substantially improves performance. This
-approach applies the same insight directly to dilation-rate setting: the Fast
-Fourier Transform is applied to the training data to locate the $L$ dominant
-frequency components, each is converted to a period $P_\ell = T / f_\ell$, and
-the dilation for layer $\ell$ is then set so that the kernel's sampling stride
-matches one full period---$d_\ell = \lfloor P_\ell/(k-1)\rfloor$. No
-additional trainable parameters are introduced; the entire calibration runs
-once as an offline pre-processing step, and the resulting dilation schedule is
-automatically customised to each dataset's physical periodicity.
+\noindent\textit{Reference: Chen et al.\ (2020), Dynamic Convolution, CVPR;
+Wang et al.\ (2018), Non-local Neural Networks, CVPR.}
+
+\medskip
+
+The first three approaches share a common limitation: each convolution layer
+uses a single dilation rate applied uniformly to every position in the sequence.
+Approach~IV breaks this restriction by computing a separate, position-specific
+effective dilation for every time step within a single forward pass. Before the
+convolution is applied, a lightweight self-attention module reads the layer's
+input and assigns to each position~$t$ a probability distribution over candidate
+offsets $\delta$. The query vector for position~$t$ is dot-produced with the
+key vector of each historical position $t{-}\delta$; after softmax normalisation
+these dot-products become attention weights $a_{t,\delta}$. The expected offset
+$\bar{d}_t = \sum_\delta \delta\,a_{t,\delta}$ is the position's suggested
+dilation: when $t$ is most similar to nearby history (high-frequency region),
+weights concentrate on small $\delta$ and $\bar{d}_t$ is small; when $t$
+relates more to distant history (low-frequency region), weights shift to large
+$\delta$ and $\bar{d}_t$ is large. A sigmoid gate then scales the base dilation
+$d_\ell^{(0)}$ by a context-dependent factor derived from $\hv^{(\ell-1)}$,
+bounding the final rate within $[0,\,2d_\ell^{(0)}]$ to prevent the receptive
+field from growing without bound. This computation is repeated independently
+for every position~$t$, making Approach~IV the finest-grained of all four
+methods. The cost is that the attention computation scales linearly with
+sequence length, making inference noticeably more expensive than the other
+approaches.
 
 \medskip
 
 \noindent\textbf{Core equations.}
 \begin{align}
-  A_f &= \frac{1}{C}\sum_{c=1}^C \bigl|\FFT(\xv[c,:])[f]\bigr|,
-    \quad f=1,\ldots,\lfloor T/2\rfloor, \label{eq:fft}\\
-  \{f_1,\ldots,f_L\} &= \TopK\!\left(\{A_f\},\,L\right), \label{eq:topk}\\
-  P_\ell &= \left\lfloor T / f_\ell \right\rceil, \label{eq:period}\\
-  d_\ell &= \max\!\left(1,\,\left\lfloor P_\ell/(k-1)\right\rceil\right). \label{eq:freqdil}
-\end{align}
-
-\begin{figure}[H]
-  \centering
-  \begin{tikzpicture}[>=Stealth, font=\small,
-      box/.style={draw, rounded corners=3pt, minimum width=2.0cm,
-                  minimum height=0.65cm, align=center, fill=approachteal!20},
-      arr/.style={->, thick}
-    ]
-    \node[box] (inp) {Input $\xv$};
-    \node[box, fill=approachteal!30, right=1.1cm of inp] (fft)
-          {FFT\\$A_f=|\hat{X}_f|$};
-    \node[box, fill=approachteal!40, right=1.1cm of fft] (topk)
-          {Top-$L$\\freqs $f_\ell$};
-    \node[box, fill=approachteal!50, right=1.1cm of topk] (per)
-          {Periods\\$P_\ell{=}T/f_\ell$};
-    \node[box, fill=accentorange!40, right=1.1cm of per] (dil)
-          {Dilations\\$d_\ell{=}\lfloor P_\ell/(k{-}1)\rfloor$};
-
-    \draw[arr] (inp) -- (fft);
-    \draw[arr] (fft) -- (topk);
-    \draw[arr] (topk) -- (per);
-    \draw[arr] (per) -- (dil);
-
-    % Small spectrum sketch below
-    \begin{scope}[shift={(2.2,-2.0)}]
-      \begin{axis}[
-          width=5cm, height=2.4cm,
-          xtick=\empty, ytick=\empty,
-          axis lines=left,
-          xlabel={\scriptsize frequency $f$},
-          ylabel={\scriptsize $A_f$},
-          x label style={font=\tiny, at={(axis description cs:0.5,-0.18)}, anchor=north},
-          y label style={font=\tiny, at={(axis description cs:-0.18,0.5)}, anchor=south},
-          ymin=0, ymax=1.0,
-        ]
-        \addplot[fill=approachteal!30, draw=approachteal!70, ybar, bar width=2pt,
-                 samples at={1,2,...,15}]
-          {0.05+0.8*exp(-0.5*(x-4)^2)+0.5*exp(-0.4*(x-8)^2)
-               +0.3*exp(-0.6*(x-12)^2)};
-        \addplot[mark=*, mark size=2.5pt, color=accentorange, only marks]
-          coordinates{(4,0.85) (8,0.55) (12,0.35)};
-      \end{axis}
-      \node[font=\scriptsize\itshape, below=0pt] at (2.5,-0.6)
-            {Dominant peaks (orange) $\rightarrow$ periods $\rightarrow$ dilations};
-    \end{scope}
-  \end{tikzpicture}
-  \caption{Approach~IV: the FFT magnitude spectrum is computed once from the
-           training set; the $L$ largest peaks (orange dots) determine periods
-           $P_\ell$, which are mapped to dilation rates $d_\ell$.}
-  \label{fig:approach4}
-\end{figure}
-
-\clearpage
-%=============================================================================
-\section{Approach V: Temporal Self-Attention Guided Dynamic Dilation}
-%=============================================================================
-
-\textbf{Dynamic Convolution}~\citep{chen2020dynamic} showed that conditioning
-convolution kernels on the current input context---rather than using fixed
-weights---substantially increases representational capacity.
-\textbf{Non-local Means}~\citep{wang2018nonlocal} similarly showed the benefit
-of using position-level attention to identify the most informative temporal
-offsets. Combining these ideas, this approach inserts a lightweight temporal
-self-attention module before the convolution: query and key projections are
-applied to the hidden state, producing a per-position attention score
-$a_{t,\delta}$ for each candidate offset $\delta$. The expected offset
-$\bar{d}_t = \sum_\delta \delta\,a_{t,\delta}$ gives a continuous,
-position-level effective dilation that varies \emph{within a single sequence}:
-high-frequency regions concentrate weight on small offsets (fine scale), while
-smoother or longer-range regions concentrate weight on large offsets (coarse
-scale). A multiplicative gate then modulates the base dilation $d_\ell^{(0)}$
-of the original layer by this context-dependent factor.
-
-\medskip
-
-\noindent\textbf{Core equations.}
-\begin{align}
-  e_{t,\delta} &= \frac{\mathbf{q}_t^\top \mathbf{k}_{t-\delta}}{\sqrt{d_k}},
-    \quad
-    a_{t,\delta} = \frac{\exp(e_{t,\delta})}{\sum_{\delta'}\exp(e_{t,\delta'})},
+  e_{t,\delta}
+    &= \frac{\mathbf{q}_t^{\top}\mathbf{k}_{t-\delta}}{\sqrt{d_k}},
+    \qquad
+    a_{t,\delta}
+    = \frac{\exp(e_{t,\delta})}{\sum_{\delta'}\exp(e_{t,\delta'})},
     \label{eq:attn}\\
-  \bar{d}_t &= \sum_{\delta=0}^{T_{\max}} \delta\cdot a_{t,\delta},
+  \bar{d}_t
+    &= \sum_{\delta=0}^{T_{\max}} \delta\cdot a_{t,\delta},
     \label{eq:effd}\\
-  \tilde{d}_{t,\ell} &= d_\ell^{(0)}\cdot
-    2\,\sigmoid\!\left(\mathbf{w}_s^\top\hv^{(\ell-1)}[:,t]+b_s\right),
+  \tilde{d}_{t,\ell}
+    &= d_\ell^{(0)}\cdot 2\,\sigmoid\!\bigl(\mathbf{w}_s^{\top}
+       \hv^{(\ell-1)}[:,t]+b_s\bigr),
     \label{eq:dyngate}
 \end{align}
-where \cref{eq:dyngate} bounds the adapted dilation in $[0, 2d_\ell^{(0)}]$.
+where \cref{eq:dyngate} constrains the adapted dilation to
+$[0,\,2d_\ell^{(0)}]$.
 
 \begin{figure}[H]
   \centering
   \begin{tikzpicture}[>=Stealth, font=\small,
-      box/.style={draw, rounded corners=3pt, minimum width=2.0cm,
-                  minimum height=0.65cm, align=center, fill=approachorange!15},
+      mbox/.style={draw, rounded corners=4pt, minimum width=2.4cm,
+                   minimum height=0.75cm, align=center},
       arr/.style={->, thick}
     ]
-    \node[box] (h0) {$\hv^{(\ell-1)}$};
+    %-- Main-line nodes (y=0)
+    \node[mbox, fill=approachblue!20]   (h0)   at (0,   0) {$\hv^{(\ell-1)}$};
+    \node[mbox, fill=accentorange!25]   (attn) at (6.0, 0) {Attention\\$a_{t,\delta}$, $\bar{d}_t$};
+    \node[mbox, fill=accentorange!50]   (gate) at (10.5,0) {Gate\\$\tilde{d}_{t,\ell}$};
+    \node[mbox, fill=approachblue!30]   (out)  at (14.5,0) {$\hv^{(\ell)}$};
 
-    \node[box, fill=approachorange!25, right=1.0cm of h0, yshift= 0.9cm]
-      (q) {$\mathbf{q}_t{=}\mathbf{W}_Q\hv$};
-    \node[box, fill=approachorange!25, right=1.0cm of h0, yshift=-0.9cm]
-      (k) {$\mathbf{k}_t{=}\mathbf{W}_K\hv$};
+    %-- Projection nodes (above and below main line, clear of other boxes)
+    \node[mbox, fill=approachblue!10]   (q)    at (3.2,  2.0) {$\mathbf{q}_t{=}\mathbf{W}_Q\hv$};
+    \node[mbox, fill=approachblue!10]   (k)    at (3.2, -2.0) {$\mathbf{k}_t{=}\mathbf{W}_K\hv$};
 
-    \draw[arr] (h0) -- (q);
-    \draw[arr] (h0) -- (k);
+    %-- h0 → q (up-right)
+    \draw[arr] (h0.north) to[out=80, in=170] (q.west);
+    %-- h0 → k (down-right)
+    \draw[arr] (h0.south) to[out=-80, in=-170] (k.west);
 
-    \node[box, fill=accentorange!30, right=2.5cm of h0] (attn)
-          {Attn $a_{t,\delta}$\\$\bar{d}_t$};
-    \draw[arr] (q) -- (attn);
-    \draw[arr] (k) -- (attn);
+    %-- q → attn (down-right from projection to attention)
+    \draw[arr] (q.east) to[out=0, in=110] (attn.north);
+    %-- k → attn (up-right from projection to attention)
+    \draw[arr] (k.east) to[out=0, in=-110] (attn.south);
 
-    \node[box, fill=accentorange!50, right=1.1cm of attn] (gate)
-          {Gate\\$\tilde{d}_{t,\ell}$};
-    \draw[arr] (attn) -- (gate)
-      node[midway, above, font=\scriptsize]{$\bar{d}_t$};
-    \draw[arr] (h0.east) to[out=0, in=-130] (gate.south west);
+    %-- attn → gate (horizontal, label above the arrow)
+    \draw[arr] (attn.east) -- node[above, font=\scriptsize]{$\bar{d}_t$} (gate.west);
 
-    \node[box, fill=approachorange!35, right=1.1cm of gate] (out)
-          {$\hv^{(\ell)}$};
-    \draw[arr] (gate) -- (out);
+    %-- h0 → gate: arc well below everything (carry features for gated conv)
+    \draw[arr] (h0.south) to[out=-50, in=-130]
+      node[below=6pt, font=\scriptsize]{features} (gate.south);
 
-    \node[font=\scriptsize, below=4pt of attn, text=darkgray, align=center]
-          {per-position\\$\bar{d}_t$ varies};
-    \node[font=\scriptsize, below=4pt of gate, text=darkgray, align=center]
-          {$\tilde{d}_{t,\ell}\in[0,2d^{(0)}_\ell]$};
+    %-- gate → out
+    \draw[arr] (gate.east) -- (out.west);
+
+    %-- Annotation labels: placed BELOW boxes, never overlapping arrows
+    \node[font=\scriptsize, color=darkgray, anchor=north, align=center]
+          at ([yshift=-5pt]attn.south)
+          {$\bar{d}_t$: per-position expected offset};
+    \node[font=\scriptsize, color=darkgray, anchor=north, align=center]
+          at ([yshift=-5pt]gate.south)
+          {range: $[0,\;2d_\ell^{(0)}]$};
+
   \end{tikzpicture}
-  \caption{Approach~V: a self-attention module computes a per-position expected
-           offset $\bar{d}_t$; a sigmoid gate (right) scales the base dilation
-           $d_\ell^{(0)}$ by a context-dependent factor, producing a fully
-           position-adaptive effective dilation.}
-  \label{fig:approach5}
+  \caption{Approach~IV: query/key projections (top and bottom) feed the
+           attention module (centre-left) which computes a position-specific
+           expected offset $\bar{d}_t$. A sigmoid gate (centre-right) uses
+           $\bar{d}_t$ and the raw features to produce the final per-position
+           dilation $\tilde{d}_{t,\ell}$, bounded within
+           $[0,\,2d_\ell^{(0)}]$.}
+  \label{fig:approach4}
 \end{figure}
 
 \clearpage
@@ -566,12 +581,12 @@ where \cref{eq:dyngate} bounds the adapted dilation in $[0, 2d_\ell^{(0)}]$.
 \section{Comparative Discussion}
 %=============================================================================
 
-\Cref{tab:comparison} summarises the five approaches along key design
-dimensions. The recommended starting point is a hybrid of Approaches~IV and~I:
-use the spectral calibration (\cref{eq:freqdil}) to set the initial
-$\lambda_\ell^{(0)}=\log(d_\ell^{\text{spectral}})$, then fine-tune with
+\Cref{tab:comparison} summarises the four approaches along key design
+dimensions. For a practical starting point, a hybrid of Approaches~III and~I
+is recommended: use the spectral calibration (\cref{eq:freqdil}) to initialise
+$\lambda_\ell^{(0)} = \log(d_\ell^{\text{spectral}})$, then fine-tune with
 learnable soft dilations. This combines physics-guided initialisation with
-gradient-based refinement at minimal implementation cost.
+end-to-end refinement at minimal additional cost.
 
 \vspace{6pt}
 
@@ -579,68 +594,23 @@ gradient-based refinement at minimal implementation cost.
   \centering
   \caption{Comparison of adaptive dilation approaches.}
   \label{tab:comparison}
-  \setlength{\tabcolsep}{5pt}
-  \renewcommand{\arraystretch}{1.25}
-  \begin{tabular}{@{}lccccl@{}}
+  \setlength{\tabcolsep}{6pt}
+  \renewcommand{\arraystretch}{1.3}
+  \begin{tabular}{@{}llcccc@{}}
     \toprule
-    \textbf{Approach} & \textbf{Extra params} & \textbf{Adapt.\ level}
-      & \textbf{Search?} & \textbf{Infer.\ cost} & \textbf{Key reference} \\
+    & \textbf{Approach}
+      & \textbf{Extra params}
+      & \textbf{Adapt.\ level}
+      & \textbf{Training needed?}
+      & \textbf{Inference cost} \\
     \midrule
-    Fixed (baseline)   & 0            & ---          & No       & $\mathcal{O}(LC)$    & --- \\
-    I.\ Soft dilation  & $L$ scalars  & Global       & No       & $\mathcal{O}(LC)$    & \cite{dai2017deformable}\\
-    II.\ SKNet fusion  & $O(KH^2)$    & Per-sample   & No       & $\mathcal{O}(KLC)$   & \cite{li2019selective}\\
-    III.\ DARTS        & $LK$ (search)& Global       & Yes      & $\mathcal{O}(LC)$    & \cite{liu2019darts}\\
-    IV.\ Spectral      & 0            & Global       & No       & $\mathcal{O}(LC)$    & \cite{wu2023timesnet}\\
-    V.\ Attn-guided    & $O(Hd_k L)$  & Per-position & No       & $\mathcal{O}(LCT)$   & \cite{chen2020dynamic}\\
+    ---   & Fixed (baseline)    & 0             & ---           & No (preset)   & $\mathcal{O}(LC)$ \\
+    I     & Soft dilation       & $L$ scalars   & Global        & Yes (E2E)     & $\mathcal{O}(LC)$ \\
+    II    & SKNet fusion        & $O(KH^2)$     & Per-sample    & Yes (E2E)     & $\mathcal{O}(KLC)$ \\
+    III   & Spectral calibration& 0             & Per-dataset   & No (offline)  & $\mathcal{O}(LC)$ \\
+    IV    & Attn-guided         & $O(H d_k L)$  & Per-position  & Yes (E2E)     & $\mathcal{O}(LCT)$ \\
     \bottomrule
   \end{tabular}
 \end{table}
-
-%=============================================================================
-\bibliographystyle{plainnat}
-\begin{thebibliography}{99}
-
-\bibitem[Chen et al.(2020)]{chen2020dynamic}
-Chen, Y., Dai, X., Liu, M., Chen, D., Yuan, L., \& Liu, Z. (2020).
-Dynamic convolution: Attention over convolution kernels.
-\textit{CVPR}, pp.\ 11030--11039.
-
-\bibitem[Dai et al.(2017)]{dai2017deformable}
-Dai, J., Qi, H., Xiong, Y., Li, Y., Zhang, G., Hu, H., \& Wei, Y. (2017).
-Deformable convolutional networks.
-\textit{ICCV}, pp.\ 764--773.
-
-\bibitem[Hu et al.(2018)]{hu2018squeeze}
-Hu, J., Shen, L., \& Sun, G. (2018).
-Squeeze-and-excitation networks.
-\textit{CVPR}, pp.\ 7132--7141.
-
-\bibitem[Li et al.(2019)]{li2019selective}
-Li, X., Wang, W., Hu, X., \& Yang, J. (2019).
-Selective kernel networks.
-\textit{CVPR}, pp.\ 510--519.
-
-\bibitem[Liu et al.(2019)]{liu2019darts}
-Liu, H., Simonyan, K., \& Yang, Y. (2019).
-DARTS: Differentiable architecture search.
-\textit{ICLR}.
-
-\bibitem[Wang et al.(2018)]{wang2018nonlocal}
-Wang, X., Girshick, R., Gupta, A., \& He, K. (2018).
-Non-local neural networks.
-\textit{CVPR}, pp.\ 7794--7803.
-
-\bibitem[Wu et al.(2023)]{wu2023timesnet}
-Wu, H., Hu, T., Liu, Y., Zhou, H., Wang, J., \& Long, M. (2023).
-TimesNet: Temporal 2D-variation modeling for general time series analysis.
-\textit{ICLR}.
-
-\bibitem[Zhou et al.(2022)]{zhou2022fedformer}
-Zhou, T., Ma, Z., Wen, Q., Wang, X., Sun, L., \& Jin, R. (2022).
-FEDformer: Frequency enhanced decomposed transformer for long-term series
-forecasting.
-\textit{ICML}, pp.\ 27268--27286.
-
-\end{thebibliography}
 
 \end{document}
