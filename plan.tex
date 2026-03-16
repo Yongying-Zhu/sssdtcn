@@ -20,7 +20,7 @@
 \usepackage{array}
 \usepackage{xcolor}
 \usepackage{float}
-\usepackage{placeins}
+\usepackage[section]{placeins}
 \usepackage{hyperref}
 \usepackage{cleveref}
 \usepackage{parskip}
@@ -457,8 +457,7 @@ dilation schedule, requiring no retraining.
     \draw[arr] (inp)  -- (fft);
     \draw[arr] (fft)  -- (avg);
     \draw[arr] (avg)  -- (topk);
-    \draw[arr] (topk) -- node[above, font=\scriptsize]
-                           {$P_\ell{=}\lfloor T/f_\ell\rceil$} (dil);
+    \draw[arr] (topk) -- (dil);
 
     %-- Step 2: spectrum sketch below the pipeline (shifted well down)
     \begin{scope}[shift={(3.5, -3.0)}]
@@ -561,51 +560,60 @@ $[0,\,2d_\ell^{(0)}]$.
                    minimum height=0.75cm, align=center},
       arr/.style={->, thick}
     ]
-    %-- Main-line nodes (y=0)
-    \node[mbox, fill=approachblue!20]   (h0)   at (0,   0) {$\hv^{(\ell-1)}$};
-    \node[mbox, fill=accentorange!25]   (attn) at (5.5, 0) {Attention\\$a_{t,\delta}$, $\bar{d}_t$};
-    \node[mbox, fill=accentorange!50]   (gate) at (9.8, 0) {Gate\\$\tilde{d}_{t,\ell}$};
-    \node[mbox, fill=approachblue!30]   (out)  at (13.5,0) {$\hv^{(\ell)}$};
+    % ----------------------------------------------------------------
+    % Node layout (all positions in TikZ units, before scale):
+    %   h0  (0,0)   q (3.0,+1.9)   k (3.0,-1.9)
+    %   attn(5.5,0)  gate(9.8,0)   out(13.5,0)
+    % The h0→gate "features" path is routed at y=-3.0,
+    % well below the k box whose south is at y≈-2.275.
+    % ----------------------------------------------------------------
 
-    %-- Projection nodes (above and below main line, clear of other boxes)
-    \node[mbox, fill=approachblue!10]   (q)    at (3.0,  1.9) {$\mathbf{q}_t{=}\mathbf{W}_Q\hv$};
-    \node[mbox, fill=approachblue!10]   (k)    at (3.0, -1.9) {$\mathbf{k}_t{=}\mathbf{W}_K\hv$};
+    %-- Main-line nodes
+    \node[mbox, fill=approachblue!20] (h0)   at (0,   0) {$\hv^{(\ell-1)}$};
+    \node[mbox, fill=accentorange!25] (attn) at (5.5, 0) {Attention\\$a_{t,\delta},\;\bar{d}_t$};
+    \node[mbox, fill=accentorange!50] (gate) at (9.8, 0) {Gate\\$\tilde{d}_{t,\ell}$};
+    \node[mbox, fill=approachblue!30] (out)  at (13.5,0) {$\hv^{(\ell)}$};
 
-    %-- h0 → q (up-right)
-    \draw[arr] (h0.north) to[out=80, in=170] (q.west);
-    %-- h0 → k (down-right)
-    \draw[arr] (h0.south) to[out=-80, in=-170] (k.west);
+    %-- Projection nodes (symmetric, above and below)
+    \node[mbox, fill=approachblue!10] (q) at (3.0,  1.9)
+          {$\mathbf{q}_t{=}\mathbf{W}_Q\hv$};
+    \node[mbox, fill=approachblue!10] (k) at (3.0, -1.9)
+          {$\mathbf{k}_t{=}\mathbf{W}_K\hv$};
 
-    %-- q → attn (down-right from projection to attention)
-    \draw[arr] (q.east) to[out=0, in=110] (attn.north);
-    %-- k → attn (up-right from projection to attention)
-    \draw[arr] (k.east) to[out=0, in=-110] (attn.south);
+    %-- h0 → q  (smooth upward curve, in from west)
+    \draw[arr] (h0.north) to[out=75, in=175] (q.west);
+    %-- h0 → k  (smooth downward curve, in from west)
+    \draw[arr] (h0.south) to[out=-75, in=-175] (k.west);
 
-    %-- attn → gate (horizontal, label above the arrow)
+    %-- q → attn  (down into attn's north-west)
+    \draw[arr] (q.east)  to[out=0, in=115] (attn.north west);
+    %-- k → attn  (up into attn's south-west)
+    \draw[arr] (k.east)  to[out=0, in=-115] (attn.south west);
+
+    %-- attn → gate
     \draw[arr] (attn.east) -- node[above, font=\scriptsize]{$\bar{d}_t$} (gate.west);
 
-    %-- h0 → gate: arc well below everything (carry features for gated conv)
-    \draw[arr] (h0.south) to[out=-50, in=-130]
-      node[below=6pt, font=\scriptsize]{features} (gate.south);
+    %-- h0 → gate: explicit L-shaped path BELOW k node (no crossing)
+    %   Segment 1: straight down to y = -3.0  (k's south is at y ≈ -2.275)
+    %   Segment 2: straight right to gate's x
+    %   Segment 3: straight up into gate's south
+    \draw[arr]
+      (h0.south) -- (0,-3.0)
+                 -- node[below, font=\scriptsize]{$\hv^{(\ell-1)}$ (features)}
+                    (9.8,-3.0)
+                 -- (gate.south);
 
     %-- gate → out
     \draw[arr] (gate.east) -- (out.west);
 
-    %-- Annotation labels: placed BELOW boxes, never overlapping arrows
-    \node[font=\scriptsize, color=darkgray, anchor=north, align=center]
-          at ([yshift=-5pt]attn.south)
-          {$\bar{d}_t$: per-position expected offset};
-    \node[font=\scriptsize, color=darkgray, anchor=north, align=center]
-          at ([yshift=-5pt]gate.south)
-          {range: $[0,\;2d_\ell^{(0)}]$};
-
   \end{tikzpicture}
-  \caption{Approach~IV: query/key projections (top and bottom) feed the
-           attention module (centre-left) which computes a position-specific
-           expected offset $\bar{d}_t$. A sigmoid gate (centre-right) uses
-           $\bar{d}_t$ and the raw features to produce the final per-position
-           dilation $\tilde{d}_{t,\ell}$, bounded within
-           $[0,\,2d_\ell^{(0)}]$.}
+  \caption{Approach~IV: $\hv^{(\ell-1)}$ is projected to query $\mathbf{q}_t$
+           (upper branch) and key $\mathbf{k}_t$ (lower branch); their dot
+           products yield per-offset attention weights $a_{t,\delta}$, whose
+           expectation gives the suggested dilation $\bar{d}_t$. The sigmoid
+           gate (right) additionally takes the raw hidden state (bottom path)
+           and scales $d_\ell^{(0)}$ to produce $\tilde{d}_{t,\ell}\in
+           [0,\,2d_\ell^{(0)}]$.}
   \label{fig:approach4}
 \end{figure}
 

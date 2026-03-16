@@ -39,21 +39,21 @@
 \newlabel{eq:period@cref}{{[equation][11][]11}{[1][5][]5}}
 \newlabel{eq:freqdil}{{12}{5}{Approach III: Frequency-Spectral Guided Adaptive Dilation}{equation.3.12}{}}
 \newlabel{eq:freqdil@cref}{{[equation][12][]12}{[1][5][]5}}
-\@writefile{toc}{\contentsline {section}{\numberline {4}Approach IV: Temporal Self-Attention Guided Dynamic Dilation}{5}{section.4}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Approach~III: the four-step offline calibration pipeline (top row). The average FFT magnitude spectrum (bottom) is computed once from the training set; the $L$ tallest peaks (orange triangles) determine dominant periods, which are converted to dilation rates via \cref  {eq:freqdil}.}}{6}{figure.caption.4}\protected@file@percent }
 \newlabel{fig:approach3}{{4}{6}{Approach~III: the four-step offline calibration pipeline (top row). The average FFT magnitude spectrum (bottom) is computed once from the training set; the $L$ tallest peaks (orange triangles) determine dominant periods, which are converted to dilation rates via \cref {eq:freqdil}}{figure.caption.4}{}}
 \newlabel{fig:approach3@cref}{{[figure][4][]4}{[1][5][]6}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Approach IV: Temporal Self-Attention Guided Dynamic Dilation}{6}{section.4}\protected@file@percent }
 \newlabel{eq:attn}{{13}{6}{Approach IV: Temporal Self-Attention Guided Dynamic Dilation}{equation.4.13}{}}
 \newlabel{eq:attn@cref}{{[equation][13][]13}{[1][6][]6}}
 \newlabel{eq:effd}{{14}{6}{Approach IV: Temporal Self-Attention Guided Dynamic Dilation}{equation.4.14}{}}
 \newlabel{eq:effd@cref}{{[equation][14][]14}{[1][6][]6}}
 \newlabel{eq:dyngate}{{15}{6}{Approach IV: Temporal Self-Attention Guided Dynamic Dilation}{equation.4.15}{}}
 \newlabel{eq:dyngate@cref}{{[equation][15][]15}{[1][6][]6}}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Comparative Discussion}{6}{section.5}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Approach~IV: query/key projections (top and bottom) feed the attention module (centre-left) which computes a position-specific expected offset $\bar  {d}_t$. A sigmoid gate (centre-right) uses $\bar  {d}_t$ and the raw features to produce the final per-position dilation $\tilde  {d}_{t,\ell }$, bounded within $[0,\,2d_\ell ^{(0)}]$.}}{7}{figure.caption.5}\protected@file@percent }
-\newlabel{fig:approach4}{{5}{7}{Approach~IV: query/key projections (top and bottom) feed the attention module (centre-left) which computes a position-specific expected offset $\bar {d}_t$. A sigmoid gate (centre-right) uses $\bar {d}_t$ and the raw features to produce the final per-position dilation $\tilde {d}_{t,\ell }$, bounded within $[0,\,2d_\ell ^{(0)}]$}{figure.caption.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Approach~IV: $\mathbf  {h}^{(\ell -1)}$ is projected to query $\mathbf  {q}_t$ (upper branch) and key $\mathbf  {k}_t$ (lower branch); their dot products yield per-offset attention weights $a_{t,\delta }$, whose expectation gives the suggested dilation $\bar  {d}_t$. The sigmoid gate (right) additionally takes the raw hidden state (bottom path) and scales $d_\ell ^{(0)}$ to produce $\tilde  {d}_{t,\ell }\in [0,\,2d_\ell ^{(0)}]$.}}{7}{figure.caption.5}\protected@file@percent }
+\newlabel{fig:approach4}{{5}{7}{Approach~IV: $\hv ^{(\ell -1)}$ is projected to query $\mathbf {q}_t$ (upper branch) and key $\mathbf {k}_t$ (lower branch); their dot products yield per-offset attention weights $a_{t,\delta }$, whose expectation gives the suggested dilation $\bar {d}_t$. The sigmoid gate (right) additionally takes the raw hidden state (bottom path) and scales $d_\ell ^{(0)}$ to produce $\tilde {d}_{t,\ell }\in [0,\,2d_\ell ^{(0)}]$}{figure.caption.5}{}}
 \newlabel{fig:approach4@cref}{{[figure][5][]5}{[1][6][]7}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Comparative Discussion}{7}{section.5}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Comparison of adaptive dilation approaches.}}{7}{table.caption.6}\protected@file@percent }
 \newlabel{tab:comparison}{{1}{7}{Comparison of adaptive dilation approaches}{table.caption.6}{}}
-\newlabel{tab:comparison@cref}{{[table][1][]1}{[1][6][]7}}
+\newlabel{tab:comparison@cref}{{[table][1][]1}{[1][7][]7}}
 \gdef \@abspage@last{8}
