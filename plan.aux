@@ -8,52 +8,52 @@
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
 \newlabel{fig:current}{{1}{2}{Current SSSDTCN implicit module: six dilated causal convolution layers with a fixed exponential dilation schedule}{figure.caption.1}{}}
 \newlabel{fig:current@cref}{{[figure][1][]1}{[1][2][]2}}
-\@writefile{toc}{\contentsline {section}{\numberline {1}Approach I: Learnable Soft Dilation Parameters}{3}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1}Approach I: Learnable Soft Dilation Parameters}{2}{section.1}\protected@file@percent }
 \newlabel{eq:softd}{{2}{3}{Approach I: Learnable Soft Dilation Parameters}{equation.1.2}{}}
-\newlabel{eq:softd@cref}{{[equation][2][]2}{[1][3][]3}}
+\newlabel{eq:softd@cref}{{[equation][2][]2}{[1][2][]3}}
 \newlabel{eq:softconv}{{3}{3}{Approach I: Learnable Soft Dilation Parameters}{equation.1.3}{}}
-\newlabel{eq:softconv@cref}{{[equation][3][]3}{[1][3][]3}}
+\newlabel{eq:softconv@cref}{{[equation][3][]3}{[1][2][]3}}
 \newlabel{eq:divreg}{{4}{3}{Approach I: Learnable Soft Dilation Parameters}{equation.1.4}{}}
-\newlabel{eq:divreg@cref}{{[equation][4][]4}{[1][3][]3}}
+\newlabel{eq:divreg@cref}{{[equation][4][]4}{[1][2][]3}}
 \@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Approach~I: $d_\ell = e^{\lambda _\ell }$ is a trainable scalar. The interpolated convolution passes gradients (green dashed arc) back to $\lambda _\ell $, optimising the dilation end-to-end.}}{3}{figure.caption.2}\protected@file@percent }
 \newlabel{fig:approach1}{{2}{3}{Approach~I: $d_\ell = e^{\lambda _\ell }$ is a trainable scalar. The interpolated convolution passes gradients (green dashed arc) back to $\lambda _\ell $, optimising the dilation end-to-end}{figure.caption.2}{}}
 \newlabel{fig:approach1@cref}{{[figure][2][]2}{[1][3][]3}}
-\@writefile{toc}{\contentsline {section}{\numberline {2}Approach II: Input-Conditioned Selective Kernel Dilation}{4}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Approach II: Input-Conditioned Selective Kernel Dilation}{3}{section.2}\protected@file@percent }
 \newlabel{eq:sk_split}{{5}{4}{Approach II: Input-Conditioned Selective Kernel Dilation}{equation.2.5}{}}
-\newlabel{eq:sk_split@cref}{{[equation][5][]5}{[1][4][]4}}
+\newlabel{eq:sk_split@cref}{{[equation][5][]5}{[1][3][]4}}
 \newlabel{eq:sk_squeeze}{{6}{4}{Approach II: Input-Conditioned Selective Kernel Dilation}{equation.2.6}{}}
-\newlabel{eq:sk_squeeze@cref}{{[equation][6][]6}{[1][4][]4}}
+\newlabel{eq:sk_squeeze@cref}{{[equation][6][]6}{[1][3][]4}}
 \newlabel{eq:sk_attn}{{7}{4}{Approach II: Input-Conditioned Selective Kernel Dilation}{equation.2.7}{}}
-\newlabel{eq:sk_attn@cref}{{[equation][7][]7}{[1][4][]4}}
+\newlabel{eq:sk_attn@cref}{{[equation][7][]7}{[1][3][]4}}
 \newlabel{eq:sk_out}{{8}{4}{Approach II: Input-Conditioned Selective Kernel Dilation}{equation.2.8}{}}
-\newlabel{eq:sk_out@cref}{{[equation][8][]8}{[1][4][]4}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Approach~II: $K$ parallel branches produce $K$ feature maps (middle column). The \emph  {upper path} aggregates and compresses them to compute per-branch weights $\alpha ^{(j)}$ (orange arrow). The \emph  {lower path} recombines the branch features using those weights. Because the Squeeze block sits above and the Combine block below all branch nodes, no arrows cross.}}{5}{figure.caption.3}\protected@file@percent }
-\newlabel{fig:approach2}{{3}{5}{Approach~II: $K$ parallel branches produce $K$ feature maps (middle column). The \emph {upper path} aggregates and compresses them to compute per-branch weights $\alpha ^{(j)}$ (orange arrow). The \emph {lower path} recombines the branch features using those weights. Because the Squeeze block sits above and the Combine block below all branch nodes, no arrows cross}{figure.caption.3}{}}
-\newlabel{fig:approach2@cref}{{[figure][3][]3}{[1][4][]5}}
-\@writefile{toc}{\contentsline {section}{\numberline {3}Approach III: Frequency-Spectral Guided Adaptive Dilation}{6}{section.3}\protected@file@percent }
-\newlabel{eq:fft}{{9}{6}{Approach III: Frequency-Spectral Guided Adaptive Dilation}{equation.3.9}{}}
-\newlabel{eq:fft@cref}{{[equation][9][]9}{[1][6][]6}}
-\newlabel{eq:topk}{{10}{6}{Approach III: Frequency-Spectral Guided Adaptive Dilation}{equation.3.10}{}}
-\newlabel{eq:topk@cref}{{[equation][10][]10}{[1][6][]6}}
-\newlabel{eq:period}{{11}{6}{Approach III: Frequency-Spectral Guided Adaptive Dilation}{equation.3.11}{}}
-\newlabel{eq:period@cref}{{[equation][11][]11}{[1][6][]6}}
-\newlabel{eq:freqdil}{{12}{6}{Approach III: Frequency-Spectral Guided Adaptive Dilation}{equation.3.12}{}}
-\newlabel{eq:freqdil@cref}{{[equation][12][]12}{[1][6][]6}}
+\newlabel{eq:sk_out@cref}{{[equation][8][]8}{[1][3][]4}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Approach~II ($K{=}3$): three parallel branches (middle column) feed the \emph  {upper squeeze path} which computes input-conditioned weights $\alpha ^{(j)}$ (orange arrow), and simultaneously feed the \emph  {lower combine path} for the final weighted sum.}}{4}{figure.caption.3}\protected@file@percent }
+\newlabel{fig:approach2}{{3}{4}{Approach~II ($K{=}3$): three parallel branches (middle column) feed the \emph {upper squeeze path} which computes input-conditioned weights $\alpha ^{(j)}$ (orange arrow), and simultaneously feed the \emph {lower combine path} for the final weighted sum}{figure.caption.3}{}}
+\newlabel{fig:approach2@cref}{{[figure][3][]3}{[1][4][]4}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Approach III: Frequency-Spectral Guided Adaptive Dilation}{4}{section.3}\protected@file@percent }
+\newlabel{eq:fft}{{9}{5}{Approach III: Frequency-Spectral Guided Adaptive Dilation}{equation.3.9}{}}
+\newlabel{eq:fft@cref}{{[equation][9][]9}{[1][5][]5}}
+\newlabel{eq:topk}{{10}{5}{Approach III: Frequency-Spectral Guided Adaptive Dilation}{equation.3.10}{}}
+\newlabel{eq:topk@cref}{{[equation][10][]10}{[1][5][]5}}
+\newlabel{eq:period}{{11}{5}{Approach III: Frequency-Spectral Guided Adaptive Dilation}{equation.3.11}{}}
+\newlabel{eq:period@cref}{{[equation][11][]11}{[1][5][]5}}
+\newlabel{eq:freqdil}{{12}{5}{Approach III: Frequency-Spectral Guided Adaptive Dilation}{equation.3.12}{}}
+\newlabel{eq:freqdil@cref}{{[equation][12][]12}{[1][5][]5}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Approach IV: Temporal Self-Attention Guided Dynamic Dilation}{5}{section.4}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Approach~III: the four-step offline calibration pipeline (top row). The average FFT magnitude spectrum (bottom) is computed once from the training set; the $L$ tallest peaks (orange triangles) determine dominant periods, which are converted to dilation rates via \cref  {eq:freqdil}.}}{6}{figure.caption.4}\protected@file@percent }
 \newlabel{fig:approach3}{{4}{6}{Approach~III: the four-step offline calibration pipeline (top row). The average FFT magnitude spectrum (bottom) is computed once from the training set; the $L$ tallest peaks (orange triangles) determine dominant periods, which are converted to dilation rates via \cref {eq:freqdil}}{figure.caption.4}{}}
-\newlabel{fig:approach3@cref}{{[figure][4][]4}{[1][6][]6}}
-\@writefile{toc}{\contentsline {section}{\numberline {4}Approach IV: Temporal Self-Attention Guided Dynamic Dilation}{7}{section.4}\protected@file@percent }
-\newlabel{eq:attn}{{13}{7}{Approach IV: Temporal Self-Attention Guided Dynamic Dilation}{equation.4.13}{}}
-\newlabel{eq:attn@cref}{{[equation][13][]13}{[1][7][]7}}
-\newlabel{eq:effd}{{14}{7}{Approach IV: Temporal Self-Attention Guided Dynamic Dilation}{equation.4.14}{}}
-\newlabel{eq:effd@cref}{{[equation][14][]14}{[1][7][]7}}
-\newlabel{eq:dyngate}{{15}{7}{Approach IV: Temporal Self-Attention Guided Dynamic Dilation}{equation.4.15}{}}
-\newlabel{eq:dyngate@cref}{{[equation][15][]15}{[1][7][]7}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Approach~IV: query/key projections (top and bottom) feed the attention module (centre-left) which computes a position-specific expected offset $\bar  {d}_t$. A sigmoid gate (centre-right) uses $\bar  {d}_t$ and the raw features to produce the final per-position dilation $\tilde  {d}_{t,\ell }$, bounded within $[0,\,2d_\ell ^{(0)}]$.}}{8}{figure.caption.5}\protected@file@percent }
-\newlabel{fig:approach4}{{5}{8}{Approach~IV: query/key projections (top and bottom) feed the attention module (centre-left) which computes a position-specific expected offset $\bar {d}_t$. A sigmoid gate (centre-right) uses $\bar {d}_t$ and the raw features to produce the final per-position dilation $\tilde {d}_{t,\ell }$, bounded within $[0,\,2d_\ell ^{(0)}]$}{figure.caption.5}{}}
-\newlabel{fig:approach4@cref}{{[figure][5][]5}{[1][7][]8}}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Comparative Discussion}{9}{section.5}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Comparison of adaptive dilation approaches.}}{9}{table.caption.6}\protected@file@percent }
-\newlabel{tab:comparison}{{1}{9}{Comparison of adaptive dilation approaches}{table.caption.6}{}}
-\newlabel{tab:comparison@cref}{{[table][1][]1}{[1][9][]9}}
-\gdef \@abspage@last{10}
+\newlabel{fig:approach3@cref}{{[figure][4][]4}{[1][5][]6}}
+\newlabel{eq:attn}{{13}{6}{Approach IV: Temporal Self-Attention Guided Dynamic Dilation}{equation.4.13}{}}
+\newlabel{eq:attn@cref}{{[equation][13][]13}{[1][6][]6}}
+\newlabel{eq:effd}{{14}{6}{Approach IV: Temporal Self-Attention Guided Dynamic Dilation}{equation.4.14}{}}
+\newlabel{eq:effd@cref}{{[equation][14][]14}{[1][6][]6}}
+\newlabel{eq:dyngate}{{15}{6}{Approach IV: Temporal Self-Attention Guided Dynamic Dilation}{equation.4.15}{}}
+\newlabel{eq:dyngate@cref}{{[equation][15][]15}{[1][6][]6}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Comparative Discussion}{6}{section.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Approach~IV: query/key projections (top and bottom) feed the attention module (centre-left) which computes a position-specific expected offset $\bar  {d}_t$. A sigmoid gate (centre-right) uses $\bar  {d}_t$ and the raw features to produce the final per-position dilation $\tilde  {d}_{t,\ell }$, bounded within $[0,\,2d_\ell ^{(0)}]$.}}{7}{figure.caption.5}\protected@file@percent }
+\newlabel{fig:approach4}{{5}{7}{Approach~IV: query/key projections (top and bottom) feed the attention module (centre-left) which computes a position-specific expected offset $\bar {d}_t$. A sigmoid gate (centre-right) uses $\bar {d}_t$ and the raw features to produce the final per-position dilation $\tilde {d}_{t,\ell }$, bounded within $[0,\,2d_\ell ^{(0)}]$}{figure.caption.5}{}}
+\newlabel{fig:approach4@cref}{{[figure][5][]5}{[1][6][]7}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Comparison of adaptive dilation approaches.}}{7}{table.caption.6}\protected@file@percent }
+\newlabel{tab:comparison}{{1}{7}{Comparison of adaptive dilation approaches}{table.caption.6}{}}
+\newlabel{tab:comparison@cref}{{[table][1][]1}{[1][6][]7}}
+\gdef \@abspage@last{8}
