@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.3.15)  15 MAR 2026 16:17
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.3.15)  16 MAR 2026 08:28
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1122,8 +1122,17 @@ LaTeX Font Info:    External font `lmex10' loaded for size
  [2
 
 {/usr/share/texmf/fonts/enc/dvips/lm/lm-mathex.enc}]
-[3] [4] [5]
-Overfull \hbox (54.39047pt too wide) in paragraph at lines 593--608
+[3]
+Overfull \hbox (7.7002pt too wide) in paragraph at lines 299--310
+\T1/lmr/bx/n/12 Worked ex-am-ple. \T1/lmr/m/n/12 With $\OML/lmm/m/it/12 K[]\OT1
+/lmr/m/n/12 3$ \T1/lmr/m/n/12 branches ($\OML/lmm/m/it/12 d[][]\OT1/lmr/m/n/12 
+1$\T1/lmr/m/n/12 , $\OML/lmm/m/it/12 d[][]\OT1/lmr/m/n/12 4$\T1/lmr/m/n/12 , $\
+OML/lmm/m/it/12 d[][]\OT1/lmr/m/n/12 8$\T1/lmr/m/n/12 ), se-quence length $\OML
+/lmm/m/it/12 T[]\OT1/lmr/m/n/12 100$\T1/lmr/m/n/12 ,
+ []
+
+[4] [5]
+Overfull \hbox (54.39047pt too wide) in paragraph at lines 631--646
  [][] 
  []
 
@@ -1136,10 +1145,10 @@ Package rerunfilecheck Info: File `plan.out' has not changed.
 (rerunfilecheck)             Checksum: 19E12510D2BEF2758E8881E2FD5E1C8B;1486.
  ) 
 Here is how much of TeX's memory you used:
- 37717 strings out of 476106
- 869747 string characters out of 5793933
- 1943975 words of memory out of 5000000
- 59078 multiletter control sequences out of 15000+600000
+ 37705 strings out of 476106
+ 869561 string characters out of 5793933
+ 1949975 words of memory out of 5000000
+ 59066 multiletter control sequences out of 15000+600000
  632898 words of font info for 90 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
  84i,15n,93p,1193b,2314s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -1148,17 +1157,18 @@ pe1/public/lm/lmbx12.pfb></usr/share/texmf/fonts/type1/public/lm/lmex10.pfb></u
 sr/share/texmf/fonts/type1/public/lm/lmmi10.pfb></usr/share/texmf/fonts/type1/p
 ublic/lm/lmmi12.pfb></usr/share/texmf/fonts/type1/public/lm/lmmi5.pfb></usr/sha
 re/texmf/fonts/type1/public/lm/lmmi6.pfb></usr/share/texmf/fonts/type1/public/l
-m/lmmi8.pfb></usr/share/texmf/fonts/type1/public/lm/lmr10.pfb></usr/share/texmf
-/fonts/type1/public/lm/lmr12.pfb></usr/share/texmf/fonts/type1/public/lm/lmr6.p
-fb></usr/share/texmf/fonts/type1/public/lm/lmr8.pfb></usr/share/texmf/fonts/typ
-e1/public/lm/lmri10.pfb></usr/share/texmf/fonts/type1/public/lm/lmri12.pfb></us
-r/share/texmf/fonts/type1/public/lm/lmsy10.pfb></usr/share/texmf/fonts/type1/pu
-blic/lm/lmsy6.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy8.pfb></usr/share
-/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on plan.pdf (8 pages, 295053 bytes).
+m/lmmi8.pfb></usr/share/texmf/fonts/type1/public/lm/lmmib10.pfb></usr/share/tex
+mf/fonts/type1/public/lm/lmr10.pfb></usr/share/texmf/fonts/type1/public/lm/lmr1
+2.pfb></usr/share/texmf/fonts/type1/public/lm/lmr6.pfb></usr/share/texmf/fonts/
+type1/public/lm/lmr8.pfb></usr/share/texmf/fonts/type1/public/lm/lmri10.pfb></u
+sr/share/texmf/fonts/type1/public/lm/lmri12.pfb></usr/share/texmf/fonts/type1/p
+ublic/lm/lmsy10.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy6.pfb></usr/sha
+re/texmf/fonts/type1/public/lm/lmsy8.pfb></usr/share/texlive/texmf-dist/fonts/t
+ype1/public/amsfonts/symbols/msbm10.pfb>
+Output written on plan.pdf (8 pages, 301507 bytes).
 PDF statistics:
- 237 PDF objects out of 1000 (max. 8388607)
- 168 compressed objects within 2 object streams
+ 244 PDF objects out of 1000 (max. 8388607)
+ 173 compressed objects within 2 object streams
  34 named destinations out of 1000 (max. 500000)
  149 words of extra memory for PDF output out of 10000 (max. 10000000)
 
