@@ -115,7 +115,7 @@ hour_labels = [f'{i//60}:00' for i in hour_ticks]
 ax3.set_xticks(hour_ticks)
 ax3.set_xticklabels(hour_labels, fontsize=9)
 
-ax3.legend(loc='upper left', fontsize=8, ncol=1, framealpha=0.95,
+ax3.legend(loc='lower left', fontsize=8, ncol=1, framealpha=0.95,
            edgecolor='#cccccc', handlelength=1.5, labelspacing=0.3)
 ax3.tick_params(labelsize=9, direction='out', length=3)
 
