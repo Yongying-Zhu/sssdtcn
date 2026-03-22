@@ -56,12 +56,16 @@ time_days = np.arange(n_samples) / samples_per_day
 
 ax1.plot(time_days, feature, color=C_GRAY, linewidth=0.7, alpha=0.9)
 
+# Mark day boundaries to make repeating diurnal pattern visible
+for d in range(1, int(time_days[-1]) + 1):
+    ax1.axvline(x=d, color='#999999', linewidth=0.8, linestyle='--', alpha=0.6)
+
 ax1.set_ylabel('Butane concentration', fontsize=10)
-ax1.set_xlim(0, 2)  # ~1.66 days data
+ax1.set_xlim(0, round(time_days[-1] + 0.05, 1))  # show all data
 ax1.set_ylim(0, 1.05)
 ax1.grid(True, alpha=0.3, linestyle='-', linewidth=0.5)
 
-xticks_a = np.arange(0, 2.5, 0.5)
+xticks_a = np.arange(0, time_days[-1] + 0.05, 0.5)
 ax1.set_xticks(xticks_a)
 ax1.set_xticklabels([f'{x:.1f}' for x in xticks_a], fontsize=9)
 ax1.tick_params(labelsize=9, direction='out', length=3)
@@ -70,20 +74,24 @@ ax1.tick_params(labelsize=9, direction='out', length=3)
 #  (b) SHORT-TERM CYCLE - 24 hours
 # ══════════════════════════════════════════════════════════════
 
-n_show_b = min(24 * samples_per_hour, n_samples)
-feature_period = feature[:n_show_b]
-time_hours = np.arange(n_show_b) / samples_per_hour
+# Use 12h–36h window: highest hourly variance, clearest recurrent fluctuations
+start_b = 12 * samples_per_hour
+n_show_b = 24 * samples_per_hour
+feature_period = feature[start_b:start_b + n_show_b]
+time_hours = np.arange(n_show_b) / samples_per_hour  # relative hours 0–24
 
 ax2.plot(time_hours, feature_period, color=C_ORANGE, linewidth=0.8)
 
 ax2.set_ylabel('Butane concentration', fontsize=10)
-ax2.set_xlim(0, n_show_b / samples_per_hour)
+ax2.set_xlim(0, 24)
 ax2.grid(True, alpha=0.3, linestyle='-', linewidth=0.5)
 
-xticks_b = np.arange(0, n_show_b / samples_per_hour + 1, 4)
+# Major ticks every 4 h, minor (grid lines) every 1 h for explicit hour marks
+xticks_b = np.arange(0, 25, 4)
 ax2.set_xticks(xticks_b)
 ax2.set_xticklabels([str(int(x)) for x in xticks_b], fontsize=9)
 ax2.xaxis.set_minor_locator(MultipleLocator(1))
+ax2.grid(True, which='minor', alpha=0.15, linestyle=':', linewidth=0.4)
 ax2.tick_params(axis='x', which='major', labelsize=9, direction='out', length=4)
 ax2.tick_params(axis='x', which='minor', direction='out', length=2)
 ax2.tick_params(axis='y', labelsize=9, direction='out', length=3)
@@ -93,27 +101,28 @@ ax2.tick_params(axis='y', labelsize=9, direction='out', length=3)
 # ══════════════════════════════════════════════════════════════
 
 n_periods = n_samples // samples_per_period
-time_minutes = np.arange(samples_per_period)
+# x-axis in hours (0–8)
+time_hours_c = np.arange(samples_per_period) / samples_per_hour
 
 period_colors = ['#4A90D9', '#E8853D', '#2ECC71', '#E74C3C']
-period_labels = ['Period 1 (8 h)', 'Period 2 (8 h)', 'Period 3 (8 h)', 'Period 4 (8 h)']
+period_labels = ['Period 1', 'Period 2', 'Period 3', 'Period 4']
 
 for i in range(min(4, n_periods)):
     start_idx = i * samples_per_period
     end_idx = start_idx + samples_per_period
     if end_idx <= n_samples:
         y_period = feature[start_idx:end_idx]
-        ax3.plot(time_minutes, y_period, color=period_colors[i],
+        ax3.plot(time_hours_c, y_period, color=period_colors[i],
                  linewidth=0.9, alpha=0.85, label=period_labels[i])
 
 ax3.set_ylabel('Butane concentration', fontsize=10)
-ax3.set_xlim(0, samples_per_period)
+ax3.set_xlim(0, 8)
 ax3.grid(True, alpha=0.3, linestyle='-', linewidth=0.5)
 
-hour_ticks = np.arange(0, samples_per_period + 1, 60)
-hour_labels = [f'{i//60}:00' for i in hour_ticks]
-ax3.set_xticks(hour_ticks)
-ax3.set_xticklabels(hour_labels, fontsize=9)
+# Tick mark at each hour boundary (0, 1, 2, ..., 8)
+hour_ticks_c = np.arange(0, 9)
+ax3.set_xticks(hour_ticks_c)
+ax3.set_xticklabels([str(h) for h in hour_ticks_c], fontsize=9)
 
 ax3.legend(loc='lower left', bbox_to_anchor=(0.0, 0.0), fontsize=8, ncol=1, framealpha=0.95,
            edgecolor='#cccccc', handlelength=1.5, labelspacing=0.3)
@@ -129,7 +138,7 @@ ax1.text(0.5, -0.16, '(a) Elapsed time (day)', transform=ax1.transAxes,
 ax2.text(0.5, -0.16, '(b) Elapsed time (hour)', transform=ax2.transAxes,
          fontsize=10, ha='center')
 
-ax3.text(0.44, -0.13, '(c) Elapsed time (min)', transform=ax3.transAxes,
+ax3.text(0.44, -0.13, '(c) Elapsed time (hour)', transform=ax3.transAxes,
          fontsize=10, ha='center')
 
 # ══════════════════════════════════════════════════════════════
