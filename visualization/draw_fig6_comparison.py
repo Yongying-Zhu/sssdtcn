@@ -57,14 +57,14 @@ def plot_panel(ax, gt, ours, trans, ylabel, c_ours, c_trans, legend_anchor):
     err_tran = np.abs(trans - gt)
 
     ax.fill_between(steps, gt - err_ours, gt + err_ours,
-                    color=c_ours,  alpha=0.30, label='Error(Ours)')
+                    color=c_ours,  alpha=0.30, label='Error(Proposed)')
     ax.fill_between(steps, gt - err_tran, gt + err_tran,
                     color=c_trans, alpha=0.30, label='Error(Transformer)')
     ax.plot(steps, gt,    'k-',          linewidth=1.5, label='GT')
-    ax.plot(steps, ours,  color=c_ours,  linewidth=0.9, label='Ours')
+    ax.plot(steps, ours,  color=c_ours,  linewidth=0.9, label='Proposed')
     ax.plot(steps, trans, color=c_trans, linewidth=0.9, label='Transformer')
 
-    # Legend order: GT, Ours, Error(Ours), Transformer, Error(Transformer)
+    # Legend order: GT, Proposed, Error(Proposed), Transformer, Error(Transformer)
     h, lbl = ax.get_legend_handles_labels()
     order = [2, 3, 0, 4, 1]
     ax.legend([h[i] for i in order], [lbl[i] for i in order],
@@ -84,7 +84,7 @@ plot_panel(ax1, deb_gt, deb_ours, deb_trans,
            'Butane product composition',
            '#1f77b4',   # blue  (matplotlib C0)
            '#ff7f0e',   # orange (matplotlib C1)
-           legend_anchor=(0.27, 0.97))
+           legend_anchor=(0.02, 0.98))
 
 plot_panel(ax2, sru_gt, sru_ours, sru_trans,
            'Air flow rate (SRU inlet)',
