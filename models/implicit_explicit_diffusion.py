@@ -40,7 +40,8 @@ class ImplicitExplicitDiffusionModel(nn.Module):
         self.hidden_dim = hidden_dim
         
         self.mask_embedding = PositionalMaskEncoding(max_len=500, embed_dim=hidden_dim)
-        self.implicit_module = DilatedCausalConv(input_dim, hidden_dim=hidden_dim, num_layers=6, kernel_size=5, dropout=dropout)
+        # DilatedCausalConv receives already-projected hidden_dim features (after input_proj + mask_embed)
+        self.implicit_module = DilatedCausalConv(hidden_dim, hidden_dim=hidden_dim, num_layers=6, kernel_size=5, dropout=dropout)
         self.explicit_module = nn.ModuleList([S4Layer(hidden_dim, d_state=256, num_heads=2, dropout=dropout) for _ in range(2)])
         
         self.input_proj = nn.Linear(input_dim, hidden_dim)

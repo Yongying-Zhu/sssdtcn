@@ -1,9 +1,21 @@
 import torch
 import torch.nn as nn
-import numpy as np
+import torch.nn.functional as F
 
 
 class S4Layer(nn.Module):
+    """
+    Structured State Space layer with diagonal state matrix.
+
+    Diagonal recurrence:  h_t = lambda * h_{t-1} + B * x_t  (element-wise)
+    Output:               y_t = C @ h_t
+
+    Implemented efficiently via causal depthwise convolution:
+      h_t[i] = sum_{k=0}^{t} lambda_i^(t-k) * B_i * x_k[i]
+    The exponential decay kernels are built on-the-fly and applied
+    with F.conv1d (grouped), eliminating the Python time-step loop.
+    """
+
     def __init__(self, d_model, d_state=256, dropout=0.1, num_heads=2):
         super().__init__()
         self.d_model = d_model
@@ -11,70 +23,69 @@ class S4Layer(nn.Module):
         self.num_heads = num_heads
         self.d_head = d_state // num_heads
 
-        self.A_list = nn.ParameterList([
-            nn.Parameter(self._init_hippo_matrix(self.d_head), requires_grad=False)
-            for _ in range(num_heads)
-        ])
-        self.B = nn.Parameter(torch.randn(num_heads, self.d_head, 1))
-        self.C = nn.Parameter(torch.randn(num_heads, 1, self.d_head))
-        self.D = nn.Parameter(torch.ones(d_model))
-        self.log_dt = nn.Parameter(torch.ones(num_heads) * (-2.0))
-        self.scale = nn.Parameter(torch.ones(num_heads) * 0.02)
+        # Learnable diagonal eigenvalues (mapped to [0,1) via sigmoid)
+        self.log_neg_lambdas = nn.Parameter(torch.randn(num_heads, self.d_head))
+        # Input scaling B
+        self.B = nn.Parameter(torch.randn(num_heads, self.d_head) * 0.1)
+        # Output projection C per head: [num_heads, d_head, d_head]
+        self.C = nn.Parameter(torch.randn(num_heads, self.d_head, self.d_head) * 0.1)
 
+        self.D = nn.Parameter(torch.ones(d_model))
         self.input_proj = nn.Linear(d_model, d_state)
         self.output_proj = nn.Linear(d_state, d_model)
         self.dropout = nn.Dropout(dropout)
         self.norm = nn.LayerNorm(d_model)
 
-    def _init_hippo_matrix(self, N):
-        A = np.zeros((N, N))
-        for n in range(N):
-            for k in range(N):
-                if n > k:
-                    A[n, k] = -np.sqrt((2*n+1) * (2*k+1))
-                elif n == k:
-                    A[n, n] = n + 1
-        A = A / (np.max(np.abs(A)) + 1e-8)
-        return torch.tensor(A, dtype=torch.float32)
+    def _apply_ssm(self, x_head, lambdas, B_h, C_h):
+        """
+        Vectorized SSM via causal depthwise convolution.
 
-    def _discretize(self, A, B, dt):
-        I = torch.eye(A.size(0), device=A.device)
-        A_discrete = torch.linalg.solve(I + dt/2 * A, I - dt/2 * A)
-        B_discrete = torch.linalg.solve(I + dt/2 * A, dt * B)
-        return A_discrete, B_discrete
+        x_head: [batch, seq_len, d_head]
+        lambdas: [d_head]  in (0, 1)
+        B_h:    [d_head]
+        C_h:    [d_head, d_head]
+        Returns: [batch, seq_len, d_head]
+        """
+        batch, seq_len, d_head = x_head.shape
+        device = x_head.device
+
+        # Build exponential-decay kernels K[t, d] = lambda[d]^t * B[d]
+        t_idx = torch.arange(seq_len, dtype=torch.float32, device=device)
+        K = lambdas.unsqueeze(0) ** t_idx.unsqueeze(1) * B_h.unsqueeze(0)
+        # K: [seq_len, d_head]
+
+        # We need causal convolution: h[t] = sum_{k=0}^{t} K[t-k] * x[k]
+        # Flip K to turn convolution into correlation with conv1d
+        K_flip = K.flip(0)  # [seq_len, d_head]
+
+        # Reshape for grouped conv1d:
+        x_in = x_head.permute(0, 2, 1)          # [B, d_head, T]
+        x_pad = F.pad(x_in, (seq_len - 1, 0))   # causal padding
+        w = K_flip.T.unsqueeze(1)                # [d_head, 1, T]
+
+        h = F.conv1d(x_pad, w, groups=d_head)   # [B, d_head, T]
+        h = h.permute(0, 2, 1)                   # [B, T, d_head]
+
+        y = h @ C_h.T                            # [B, T, d_head]
+        return y
 
     def forward(self, x):
         batch, seq_len, _ = x.shape
         residual = x
-        x_proj = self.input_proj(x)
+        x_proj = self.input_proj(x)  # [batch, seq_len, d_state]
+
         outputs = []
-
         for head in range(self.num_heads):
-            A = self.A_list[head]
-            B = self.B[head]
-            C = self.C[head]
-            dt = torch.exp(self.log_dt[head])
-            scale = self.scale[head]
+            lambdas = torch.sigmoid(self.log_neg_lambdas[head])   # [d_head]
+            B_h = self.B[head]                                      # [d_head]
+            C_h = self.C[head]                                      # [d_head, d_head]
+            x_head = x_proj[:, :, head * self.d_head:(head + 1) * self.d_head]
 
-            A_scaled = A * scale
-            A_d, B_d = self._discretize(A_scaled, B, dt)
-
-            state = torch.zeros(batch, self.d_head, device=x.device)
-            head_outputs = []
-            x_head = x_proj[:, :, head*self.d_head:(head+1)*self.d_head]
-
-            for t in range(seq_len):
-                x_t = x_head[:, t, :]
-                state = torch.matmul(state, A_d.T) + x_t.unsqueeze(2) * B_d.squeeze()
-                state = torch.clamp(state, -10, 10)
-                y_t = torch.matmul(state, C.T)
-                head_outputs.append(y_t)
-
-            head_out = torch.stack(head_outputs, dim=1)
+            head_out = self._apply_ssm(x_head, lambdas, B_h, C_h)
             outputs.append(head_out)
 
         out = torch.cat(outputs, dim=-1)
-        out = self.output_proj(out.expand(-1, -1, self.d_state))
+        out = self.output_proj(out)
         out = self.dropout(out)
         out = self.norm(out + residual)
         return out
