@@ -56,18 +56,14 @@ time_days = np.arange(n_samples) / samples_per_day
 
 ax1.plot(time_days, feature, color=C_GRAY, linewidth=0.7, alpha=0.9)
 
-# Mark day boundaries to make repeating diurnal pattern visible
-for d in range(1, int(time_days[-1]) + 1):
-    ax1.axvline(x=d, color='#999999', linewidth=0.8, linestyle='--', alpha=0.6)
-
 ax1.set_ylabel('Butane concentration', fontsize=10)
-ax1.set_xlim(0, round(time_days[-1] + 0.05, 1))  # show all data
+ax1.set_xlim(0, 1.0)   # only show first full day
 ax1.set_ylim(0, 1.05)
 ax1.grid(True, alpha=0.3, linestyle='-', linewidth=0.5)
 
-xticks_a = np.arange(0, time_days[-1] + 0.05, 0.5)
+xticks_a = np.arange(0, 1.01, 0.25)
 ax1.set_xticks(xticks_a)
-ax1.set_xticklabels([f'{x:.1f}' for x in xticks_a], fontsize=9)
+ax1.set_xticklabels([f'{x:.2f}' for x in xticks_a], fontsize=9)
 ax1.tick_params(labelsize=9, direction='out', length=3)
 
 # ══════════════════════════════════════════════════════════════
@@ -124,7 +120,7 @@ hour_ticks_c = np.arange(0, 9)
 ax3.set_xticks(hour_ticks_c)
 ax3.set_xticklabels([str(h) for h in hour_ticks_c], fontsize=9)
 
-ax3.legend(loc='lower left', bbox_to_anchor=(0.0, 0.0), fontsize=8, ncol=1, framealpha=0.95,
+ax3.legend(loc='lower left', bbox_to_anchor=(0.0, -0.01), fontsize=8, ncol=1, framealpha=0.95,
            edgecolor='#cccccc', handlelength=1.5, labelspacing=0.3)
 ax3.tick_params(labelsize=9, direction='out', length=3)
 
