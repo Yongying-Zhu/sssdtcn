@@ -51,7 +51,7 @@ sru_ours, sru_trans = make_preds(sru_gt, 0.018, 0.075)
 
 
 # ── Plotting ───────────────────────────────────────────────────────────────────
-def plot_panel(ax, gt, ours, trans, ylabel, c_ours, c_trans):
+def plot_panel(ax, gt, ours, trans, ylabel, c_ours, c_trans, legend_anchor):
     steps    = np.arange(N)
     err_ours = np.abs(ours  - gt)
     err_tran = np.abs(trans - gt)
@@ -68,7 +68,8 @@ def plot_panel(ax, gt, ours, trans, ylabel, c_ours, c_trans):
     h, lbl = ax.get_legend_handles_labels()
     order = [2, 3, 0, 4, 1]
     ax.legend([h[i] for i in order], [lbl[i] for i in order],
-              loc='upper left', fontsize=9, framealpha=0.9)
+              loc='upper left', bbox_to_anchor=legend_anchor,
+              fontsize=9, framealpha=0.9)
 
     ax.set_ylabel(ylabel, fontsize=10)
     ax.set_xlabel('Elapsed time (min)', fontsize=10)
@@ -82,12 +83,14 @@ fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8))
 plot_panel(ax1, deb_gt, deb_ours, deb_trans,
            'Butane product composition',
            '#1f77b4',   # blue  (matplotlib C0)
-           '#ff7f0e')   # orange (matplotlib C1)
+           '#ff7f0e',   # orange (matplotlib C1)
+           legend_anchor=(0.27, 0.97))
 
 plot_panel(ax2, sru_gt, sru_ours, sru_trans,
            'Air flow rate (SRU inlet)',
            '#9467bd',   # purple (matplotlib C4)
-           '#2ca02c')   # green  (matplotlib C2)
+           '#2ca02c',   # green  (matplotlib C2)
+           legend_anchor=(0.02, 0.97))
 
 plt.tight_layout()
 
