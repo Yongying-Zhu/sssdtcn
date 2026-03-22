@@ -84,13 +84,13 @@ plot_panel(ax1, deb_gt, deb_ours, deb_trans,
            'Butane product composition',
            '#1f77b4',   # blue  (matplotlib C0)
            '#ff7f0e',   # orange (matplotlib C1)
-           legend_anchor=(0.10, 0.98))
+           legend_anchor=(0.20, 0.98))
 
 plot_panel(ax2, sru_gt, sru_ours, sru_trans,
            'Air flow rate (SRU inlet)',
            '#9467bd',   # purple (matplotlib C4)
            '#2ca02c',   # green  (matplotlib C2)
-           legend_anchor=(0.10, 0.98))
+           legend_anchor=(0.11, 0.98))
 
 plt.tight_layout()
 
