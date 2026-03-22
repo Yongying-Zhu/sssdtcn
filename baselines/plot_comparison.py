@@ -76,7 +76,7 @@ def plot_error_comparison(ax, gt, our_pred, trans_pred, mask, feature_idx, ylabe
     ax.plot(time_steps, our_long, '-', color='#2E5D8C', linewidth=0.8, label='OUR')
     ax.plot(time_steps, trans_long, '-', color='#D4841A', linewidth=0.8, label='Transformer')
     
-    ax.set_xlabel('Time step', fontsize=10)
+    ax.set_xlabel('Elapsed time (min)', fontsize=10)
     ax.set_ylabel(ylabel, fontsize=10)
     ax.legend(loc='upper left', fontsize=7, ncol=2, framealpha=0.9)
     ax.set_xlim(0, total_len)
