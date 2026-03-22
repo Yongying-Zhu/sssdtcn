@@ -10,7 +10,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-plt.rcParams['font.family'] = 'DejaVu Sans'
+plt.rcParams['font.family'] = 'serif'
+plt.rcParams['font.serif'] = ['Times New Roman', 'DejaVu Serif', 'Liberation Serif']
+plt.rcParams['axes.linewidth'] = 0.8
+plt.rcParams['axes.edgecolor'] = '#333333'
 plt.rcParams['font.size'] = 10
 
 N = 200
