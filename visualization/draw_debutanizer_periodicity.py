@@ -141,9 +141,12 @@ ax3.text(0.44, -0.13, '(c) Elapsed time (hour)', transform=ax3.transAxes,
 #  SAVE
 # ══════════════════════════════════════════════════════════════
 
-out_path = '/home/user/sssdtcn/results/figures/fig2_implicit_module'
-for ext in ('png', 'pdf'):
-    fig.savefig(f'{out_path}.{ext}', dpi=300, bbox_inches='tight', facecolor='white')
+for out_path in (
+    '/home/user/sssdtcn/results/figures/fig2_implicit_module',
+    '/home/user/sssdtcn/results/figures/fig_debutanizer_periodicity',
+):
+    for ext in ('png', 'pdf'):
+        fig.savefig(f'{out_path}.{ext}', dpi=300, bbox_inches='tight', facecolor='white')
+    print(f'Saved: {out_path}.png/pdf')
 plt.close(fig)
-print(f'Saved: {out_path}.png/pdf')
 print(f'Feature selected: u7 (highest periodicity, autocorr=0.424)')
