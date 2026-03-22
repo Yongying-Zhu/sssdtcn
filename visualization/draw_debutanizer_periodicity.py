@@ -5,13 +5,14 @@ Feature: u7 (selected for strongest periodicity - autocorr=0.424)
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator
 import numpy as np
 
 # ══════════════════════════════════════════════════════════════
 #  LOAD DATA - Select u7 (best periodicity, autocorr=0.424)
 # ══════════════════════════════════════════════════════════════
 
-data = np.loadtxt('/home/user/sssdtcn/debutanizer_data.txt', skiprows=5)
+data = np.loadtxt('/home/user/sssdtcn/data/debutanizer_data.txt', skiprows=5)
 # u7 is column index 6 (0-indexed: u1=0, u2=1, ..., u7=6)
 feature = data[:, 6]
 feature_name = 'u7 (Butane concentration)'
@@ -82,7 +83,10 @@ ax2.grid(True, alpha=0.3, linestyle='-', linewidth=0.5)
 xticks_b = np.arange(0, n_show_b / samples_per_hour + 1, 4)
 ax2.set_xticks(xticks_b)
 ax2.set_xticklabels([str(int(x)) for x in xticks_b], fontsize=9)
-ax2.tick_params(labelsize=9, direction='out', length=3)
+ax2.xaxis.set_minor_locator(MultipleLocator(1))
+ax2.tick_params(axis='x', which='major', labelsize=9, direction='out', length=4)
+ax2.tick_params(axis='x', which='minor', direction='out', length=2)
+ax2.tick_params(axis='y', labelsize=9, direction='out', length=3)
 
 # ══════════════════════════════════════════════════════════════
 #  (c) INTRA-PERIOD PATTERN OVERLAY
@@ -92,7 +96,7 @@ n_periods = n_samples // samples_per_period
 time_minutes = np.arange(samples_per_period)
 
 period_colors = ['#4A90D9', '#E8853D', '#2ECC71', '#E74C3C']
-period_labels = ['Period 1', 'Period 2', 'Period 3', 'Period 4']
+period_labels = ['Period 1 (8 h)', 'Period 2 (8 h)', 'Period 3 (8 h)', 'Period 4 (8 h)']
 
 for i in range(min(4, n_periods)):
     start_idx = i * samples_per_period
@@ -119,20 +123,20 @@ ax3.tick_params(labelsize=9, direction='out', length=3)
 #  SUBPLOT LABELS
 # ══════════════════════════════════════════════════════════════
 
-ax1.text(0.5, -0.16, '(a) Time interval (day)', transform=ax1.transAxes,
+ax1.text(0.5, -0.16, '(a) Elapsed time (day)', transform=ax1.transAxes,
          fontsize=10, ha='center')
 
-ax2.text(0.5, -0.16, '(b) Time interval (hour)', transform=ax2.transAxes,
+ax2.text(0.5, -0.16, '(b) Elapsed time (hour)', transform=ax2.transAxes,
          fontsize=10, ha='center')
 
-ax3.text(0.44, -0.13, '(c) Time interval (minute)', transform=ax3.transAxes,
+ax3.text(0.44, -0.13, '(c) Elapsed time (min)', transform=ax3.transAxes,
          fontsize=10, ha='center')
 
 # ══════════════════════════════════════════════════════════════
 #  SAVE
 # ══════════════════════════════════════════════════════════════
 
-out_path = '/home/user/sssdtcn/Figures4paper/fig_debutanizer_periodicity'
+out_path = '/home/user/sssdtcn/results/figures/fig2_implicit_module'
 for ext in ('png', 'pdf'):
     fig.savefig(f'{out_path}.{ext}', dpi=300, bbox_inches='tight', facecolor='white')
 plt.close(fig)
