@@ -30,6 +30,11 @@ class ConfigDebutanizer:
     early_stop_patience = 10
     early_stop_threshold = 0.005
 
+    # Huber 损失阈值 τ（专利 Innovation 2）
+    # None: 训练前自动从训练集误差分布的第 80 百分位数计算
+    # 指定正数: 直接使用该值（如 huber_delta = 1.0）
+    huber_delta = None
+
     # 评估配置
     missing_ratios = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]
 
